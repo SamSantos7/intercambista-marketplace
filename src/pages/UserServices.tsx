@@ -34,7 +34,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/use-toast';
-import CreateServiceForm from '@/components/CreateServiceForm';
+import CreateServiceForm from '../components/CreateServiceForm';
 
 // Interface para os serviços
 interface Service {
