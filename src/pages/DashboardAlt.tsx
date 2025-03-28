@@ -224,6 +224,7 @@ const DashboardAlt = () => {
                 title="Serviços Ativos" 
                 value="7"
                 description="2 aguardando aprovação"
+                trend="neutral" // Added missing trend property
                 icon={<FileText className="h-8 w-8 text-indigo-500" />}
               />
               <StatsCard 
@@ -237,6 +238,7 @@ const DashboardAlt = () => {
                 title="Avaliação Média" 
                 value="4.8"
                 description="Baseado em 37 avaliações"
+                trend="neutral" // Added missing trend property
                 icon={<BarChart4 className="h-8 w-8 text-amber-500" />}
               />
             </div>
