@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Plus, Filter, Search, Edit, Trash2, Eye, 
   ArrowUp, ArrowDown, CheckCircle, XCircle,
-  Calendar, DollarSign
+  Calendar, DollarSign, Briefcase
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
