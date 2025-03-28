@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
@@ -393,7 +394,7 @@ const DashboardAlt = () => {
                             <CardTitle className="text-base">Aulas de Português</CardTitle>
                             <Badge>Popular</Badge>
                           </div>
-                          <CardDescription>Educação > Idiomas</CardDescription>
+                          <CardDescription>Educação {'>'} Idiomas</CardDescription>
                         </CardHeader>
                         <CardContent className="p-4 pt-2">
                           <div className="flex justify-between text-sm pb-2">
@@ -438,7 +439,7 @@ const DashboardAlt = () => {
                           <div className="flex justify-between items-start">
                             <CardTitle className="text-base">Design de Sites</CardTitle>
                           </div>
-                          <CardDescription>Tecnologia > Web Design</CardDescription>
+                          <CardDescription>Tecnologia {'>'} Web Design</CardDescription>
                         </CardHeader>
                         <CardContent className="p-4 pt-2">
                           <div className="flex justify-between text-sm pb-2">
