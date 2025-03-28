@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import DashboardAlt from "./pages/DashboardAlt";
 import Services from "./pages/Services";
 import UserServices from "./pages/UserServices";
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard-alt" element={<DashboardAlt />} />
           <Route path="/services" element={<Services />} />
           <Route path="/dashboard/services" element={<UserServices />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
