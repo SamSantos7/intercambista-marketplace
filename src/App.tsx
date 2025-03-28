@@ -12,6 +12,9 @@ import Dashboard from "./pages/Dashboard";
 import DashboardAlt from "./pages/DashboardAlt";
 import Services from "./pages/Services";
 import UserServices from "./pages/UserServices";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import ServiceDetail from "./pages/ServiceDetail";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +32,9 @@ const App = () => (
           <Route path="/dashboard-alt" element={<DashboardAlt />} />
           <Route path="/services" element={<Services />} />
           <Route path="/dashboard/services" element={<UserServices />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/services/:id" element={<ServiceDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
