@@ -15,6 +15,11 @@ import UserServices from "./pages/UserServices";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import ServiceDetail from "./pages/ServiceDetail";
+import Blog from "./pages/Blog";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import FAQ from "./pages/FAQ";
+import Cookies from "./pages/Cookies";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +40,11 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/services/:id" element={<ServiceDetail />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/cookies" element={<Cookies />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
