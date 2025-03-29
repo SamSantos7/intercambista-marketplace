@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -194,7 +193,7 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           
-          <Tabs value={currentTab} onValueChange={(value) => handleRoleChange(value as UserRole)} className="w-full">
+          <Tabs value={currentTab} onValueChange={(value) => handleRoleChange(value as RegisterUserRole)} className="w-full">
             <TabsList className="grid grid-cols-2 mb-2 mx-6">
               <TabsTrigger value="client">Sou Cliente</TabsTrigger>
               <TabsTrigger value="advertiser">Sou Intercambista</TabsTrigger>
