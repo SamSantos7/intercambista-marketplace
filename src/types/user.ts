@@ -1,6 +1,9 @@
 
 export type UserRole = 'advertiser' | 'client' | 'admin';
 
+// For registration purposes only
+export type RegisterUserRole = 'advertiser' | 'client';
+
 export interface User {
   id: string;
   fullName: string;

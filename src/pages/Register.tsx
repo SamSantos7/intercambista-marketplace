@@ -36,7 +36,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/use-toast";
-import { UserRole } from '@/types/user';
+import { RegisterUserRole } from '@/types/user';
 
 // Validação do formulário
 const registerSchema = z.object({
@@ -71,7 +71,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
-  const [currentTab, setCurrentTab] = useState<UserRole>('client');
+  const [currentTab, setCurrentTab] = useState<RegisterUserRole>('client');
   const [step, setStep] = useState(1);
 
   // Form para dados básicos
@@ -124,7 +124,7 @@ const Register = () => {
   };
 
   // Lidar com mudança de tipo de usuário
-  const handleRoleChange = (role: UserRole) => {
+  const handleRoleChange = (role: RegisterUserRole) => {
     setCurrentTab(role);
     form.setValue('role', role);
   };
