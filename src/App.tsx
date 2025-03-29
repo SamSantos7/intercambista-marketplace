@@ -20,6 +20,11 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import FAQ from "./pages/FAQ";
 import Cookies from "./pages/Cookies";
+import Customers from "./pages/dashboard/Customers";
+import Messages from "./pages/dashboard/Messages";
+import Payments from "./pages/dashboard/Payments";
+import Analytics from "./pages/dashboard/Analytics";
+import Settings from "./pages/dashboard/Settings";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +50,11 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/cookies" element={<Cookies />} />
+          <Route path="/dashboard/customers" element={<Customers />} />
+          <Route path="/dashboard/messages" element={<Messages />} />
+          <Route path="/dashboard/payments" element={<Payments />} />
+          <Route path="/dashboard/analytics" element={<Analytics />} />
+          <Route path="/dashboard/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
