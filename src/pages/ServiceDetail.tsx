@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -7,17 +7,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Star from "@/components/icons/Star"; // Changed from named import to default import
+import Star from "@/components/icons/Star";
+import PaymentFlow from "@/components/PaymentFlow";
+import PaymentStatus from "@/components/PaymentStatus";
+import { usePaymentState } from "@/hooks/use-payment-state";
+import { useToast } from "@/hooks/use-toast";
 
 const ServiceDetail = () => {
   const { id } = useParams();
+  const { toast } = useToast();
+  const [showPaymentFlow, setShowPaymentFlow] = useState(false);
+  const [paymentId, setPaymentId] = useState<string | null>(null);
+  const { paymentStatus, updatePaymentStatus } = usePaymentState({
+    initialStatus: 'pending',
+    onStatusChange: (status) => {
+      console.log("Payment status changed:", status);
+    }
+  });
   
   // Mock data for this example
   const service = {
     id: id,
     title: "Assistência com Documentação",
     category: "Documentação",
-    price: "A partir de R$ 150",
+    price: 150,
     rating: 4.8,
     reviewCount: 24,
     provider: {
@@ -64,6 +77,27 @@ const ServiceDetail = () => {
         date: "10/06/2023"
       }
     ]
+  };
+
+  const handlePaymentComplete = (newPaymentId: string) => {
+    setPaymentId(newPaymentId);
+    setShowPaymentFlow(false);
+    updatePaymentStatus('held');
+  };
+
+  const handleStatusChange = (id: string, status: any, reason?: string) => {
+    updatePaymentStatus(status, reason);
+  };
+
+  const handleHireService = () => {
+    setShowPaymentFlow(true);
+  };
+
+  const handleContact = () => {
+    toast({
+      title: "Mensagem enviada",
+      description: "O prestador de serviços receberá sua mensagem e entrará em contato em breve.",
+    });
   };
 
   return (
@@ -119,52 +153,44 @@ const ServiceDetail = () => {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-2xl font-semibold mb-4">Avaliações</h2>
-                  
-                  <Tabs defaultValue="all">
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="all">Todas</TabsTrigger>
-                      <TabsTrigger value="5">5 Estrelas</TabsTrigger>
-                      <TabsTrigger value="4">4 Estrelas</TabsTrigger>
-                      <TabsTrigger value="3">3 Estrelas</TabsTrigger>
-                    </TabsList>
+              {showPaymentFlow ? (
+                <PaymentFlow 
+                  serviceId={service.id || ''}
+                  serviceTitle={service.title}
+                  servicePrice={service.price}
+                  serviceProvider={{
+                    id: '1',
+                    name: service.provider.name
+                  }}
+                  userLocation={service.provider.location}
+                  onComplete={handlePaymentComplete}
+                />
+              ) : paymentId ? (
+                <PaymentStatus 
+                  paymentId={paymentId}
+                  status={paymentStatus}
+                  amount={service.price}
+                  currency="R$"
+                  serviceTitle={service.title}
+                  isProvider={false}
+                  onStatusChange={handleStatusChange}
+                />
+              ) : (
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-2xl font-semibold mb-4">Avaliações</h2>
                     
-                    <TabsContent value="all">
-                      <div className="space-y-6">
-                        {service.reviews.map((review) => (
-                          <div key={review.id} className="border-b pb-4 last:border-0">
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <h3 className="font-semibold">{review.user}</h3>
-                                <p className="text-sm text-gray-500">{review.country}</p>
-                              </div>
-                              <div className="flex items-center">
-                                <div className="flex mr-2">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star 
-                                      key={i} 
-                                      className={i < review.rating ? "fill-yellow-400" : "fill-gray-200"} 
-                                      width={16} 
-                                      height={16} 
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-xs text-gray-500">{review.date}</span>
-                              </div>
-                            </div>
-                            <p className="text-gray-700">{review.comment}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="5">
-                      <div className="space-y-6">
-                        {service.reviews
-                          .filter(review => review.rating === 5)
-                          .map((review) => (
+                    <Tabs defaultValue="all">
+                      <TabsList className="mb-4">
+                        <TabsTrigger value="all">Todas</TabsTrigger>
+                        <TabsTrigger value="5">5 Estrelas</TabsTrigger>
+                        <TabsTrigger value="4">4 Estrelas</TabsTrigger>
+                        <TabsTrigger value="3">3 Estrelas</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="all">
+                        <div className="space-y-6">
+                          {service.reviews.map((review) => (
                             <div key={review.id} className="border-b pb-4 last:border-0">
                               <div className="flex justify-between items-start mb-2">
                                 <div>
@@ -188,85 +214,133 @@ const ServiceDetail = () => {
                               <p className="text-gray-700">{review.comment}</p>
                             </div>
                           ))}
-                      </div>
-                    </TabsContent>
-                    
-                    {/* Conteúdos similares para as outras abas */}
-                    <TabsContent value="4">
-                      <div className="space-y-6">
-                        {service.reviews
-                          .filter(review => review.rating === 4)
-                          .map((review) => (
-                            <div key={review.id} className="border-b pb-4 last:border-0">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <h3 className="font-semibold">{review.user}</h3>
-                                  <p className="text-sm text-gray-500">{review.country}</p>
-                                </div>
-                                <div className="flex items-center">
-                                  <div className="flex mr-2">
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star 
-                                        key={i} 
-                                        className={i < review.rating ? "fill-yellow-400" : "fill-gray-200"} 
-                                        width={16} 
-                                        height={16} 
-                                      />
-                                    ))}
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="5">
+                        <div className="space-y-6">
+                          {service.reviews
+                            .filter(review => review.rating === 5)
+                            .map((review) => (
+                              <div key={review.id} className="border-b pb-4 last:border-0">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <h3 className="font-semibold">{review.user}</h3>
+                                    <p className="text-sm text-gray-500">{review.country}</p>
                                   </div>
-                                  <span className="text-xs text-gray-500">{review.date}</span>
-                                </div>
-                              </div>
-                              <p className="text-gray-700">{review.comment}</p>
-                            </div>
-                          ))}
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="3">
-                      <div className="space-y-6">
-                        {service.reviews
-                          .filter(review => review.rating === 3)
-                          .map((review) => (
-                            <div key={review.id} className="border-b pb-4 last:border-0">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <h3 className="font-semibold">{review.user}</h3>
-                                  <p className="text-sm text-gray-500">{review.country}</p>
-                                </div>
-                                <div className="flex items-center">
-                                  <div className="flex mr-2">
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star 
-                                        key={i} 
-                                        className={i < review.rating ? "fill-yellow-400" : "fill-gray-200"} 
-                                        width={16} 
-                                        height={16} 
-                                      />
-                                    ))}
+                                  <div className="flex items-center">
+                                    <div className="flex mr-2">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star 
+                                          key={i} 
+                                          className={i < review.rating ? "fill-yellow-400" : "fill-gray-200"} 
+                                          width={16} 
+                                          height={16} 
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="text-xs text-gray-500">{review.date}</span>
                                   </div>
-                                  <span className="text-xs text-gray-500">{review.date}</span>
                                 </div>
+                                <p className="text-gray-700">{review.comment}</p>
                               </div>
-                              <p className="text-gray-700">{review.comment}</p>
-                            </div>
-                          ))}
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
+                            ))}
+                        </div>
+                      </TabsContent>
+                      
+                      {/* Conteúdos similares para as outras abas */}
+                      <TabsContent value="4">
+                        <div className="space-y-6">
+                          {service.reviews
+                            .filter(review => review.rating === 4)
+                            .map((review) => (
+                              <div key={review.id} className="border-b pb-4 last:border-0">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <h3 className="font-semibold">{review.user}</h3>
+                                    <p className="text-sm text-gray-500">{review.country}</p>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <div className="flex mr-2">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star 
+                                          key={i} 
+                                          className={i < review.rating ? "fill-yellow-400" : "fill-gray-200"} 
+                                          width={16} 
+                                          height={16} 
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="text-xs text-gray-500">{review.date}</span>
+                                  </div>
+                                </div>
+                                <p className="text-gray-700">{review.comment}</p>
+                              </div>
+                            ))}
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="3">
+                        <div className="space-y-6">
+                          {service.reviews
+                            .filter(review => review.rating === 3)
+                            .map((review) => (
+                              <div key={review.id} className="border-b pb-4 last:border-0">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <h3 className="font-semibold">{review.user}</h3>
+                                    <p className="text-sm text-gray-500">{review.country}</p>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <div className="flex mr-2">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star 
+                                          key={i} 
+                                          className={i < review.rating ? "fill-yellow-400" : "fill-gray-200"} 
+                                          width={16} 
+                                          height={16} 
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="text-xs text-gray-500">{review.date}</span>
+                                  </div>
+                                </div>
+                                <p className="text-gray-700">{review.comment}</p>
+                              </div>
+                            ))}
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              )}
             </div>
             
             {/* Coluna lateral */}
             <div>
               <Card className="shadow-lg sticky top-24">
                 <CardContent className="p-6">
-                  <h2 className="text-2xl font-bold mb-2">{service.price}</h2>
+                  <h2 className="text-2xl font-bold mb-2">R$ {service.price.toFixed(2)}</h2>
                   <p className="text-gray-600 mb-6">Preço pode variar conforme necessidades específicas</p>
 
-                  <Button className="w-full mb-4">Contratar Serviço</Button>
-                  <Button variant="outline" className="w-full mb-6">Entre em Contato</Button>
+                  {!paymentId && (
+                    <>
+                      <Button 
+                        className="w-full mb-4" 
+                        onClick={handleHireService}
+                        disabled={showPaymentFlow}
+                      >
+                        Contratar Serviço
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="w-full mb-6"
+                        onClick={handleContact}
+                      >
+                        Entre em Contato
+                      </Button>
+                    </>
+                  )}
 
                   <div className="mb-6">
                     <h3 className="font-semibold mb-2">Prestador de Serviço</h3>
