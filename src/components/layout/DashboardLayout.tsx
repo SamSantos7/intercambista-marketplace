@@ -87,34 +87,34 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             icon={<Home className="h-4 w-4" />}
             label="Visão Geral"
             href="/dashboard"
-            active={activeTab === 'overview'}
+            active={activeTab === 'overview' || activeTab === 'dashboard'}
             onClick={() => setActiveTab('overview')}
           />
           <SidebarItem
             icon={<Users className="h-4 w-4" />}
             label="Clientes"
-            href="/dashboard/customers"
+            href="/customers"
             active={activeTab === 'customers'}
             onClick={() => setActiveTab('customers')}
           />
           <SidebarItem
             icon={<Briefcase className="h-4 w-4" />}
             label="Meus Serviços"
-            href="/dashboard/services"
-            active={activeTab === 'services'}
+            href="/user-services"
+            active={activeTab === 'services' || activeTab === 'user-services'}
             onClick={() => setActiveTab('services')}
           />
           <SidebarItem
             icon={<Calendar className="h-4 w-4" />}
             label="Agendamentos"
-            href="/dashboard/bookings"
+            href="/bookings"
             active={activeTab === 'bookings'}
             onClick={() => setActiveTab('bookings')}
           />
           <SidebarItem
             icon={<MessageSquare className="h-4 w-4" />}
             label="Mensagens"
-            href="/dashboard/messages"
+            href="/messages"
             active={activeTab === 'messages'}
             onClick={() => setActiveTab('messages')}
             badge={unreadCount > 0 ? `${unreadCount}` : undefined}
@@ -122,21 +122,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <SidebarItem
             icon={<DollarSign className="h-4 w-4" />}
             label="Pagamentos"
-            href="/dashboard/payments"
+            href="/payments"
             active={activeTab === 'payments'}
             onClick={() => setActiveTab('payments')}
           />
           <SidebarItem
             icon={<Heart className="h-4 w-4" />}
             label="Favoritos"
-            href="/dashboard/favorites"
+            href="/favorites"
             active={activeTab === 'favorites'}
             onClick={() => setActiveTab('favorites')}
           />
           <SidebarItem
             icon={<BarChart2 className="h-4 w-4" />}
             label="Analytics"
-            href="/dashboard/analytics"
+            href="/analytics"
             active={activeTab === 'analytics'}
             onClick={() => setActiveTab('analytics')}
           />
@@ -148,14 +148,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <SidebarItem
               icon={<User className="h-4 w-4" />}
               label="Perfil"
-              href="/dashboard/profile"
+              href="/profile"
               active={activeTab === 'profile'}
               onClick={() => setActiveTab('profile')}
             />
             <SidebarItem
               icon={<Settings className="h-4 w-4" />}
               label="Configurações"
-              href="/dashboard/settings"
+              href="/settings"
               active={activeTab === 'settings'}
               onClick={() => setActiveTab('settings')}
             />
@@ -194,7 +194,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             />
             
             <Button variant="ghost" className="gap-2" asChild>
-              <Link to="/dashboard/profile" className="flex items-center gap-2">
+              <Link to="/profile" className="flex items-center gap-2">
                 <img
                   src="https://randomuser.me/api/portraits/men/32.jpg"
                   alt="User avatar"

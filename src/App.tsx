@@ -30,6 +30,7 @@ import Analytics from "./pages/dashboard/Analytics";
 import Settings from "./pages/dashboard/Settings";
 import ServicePromotion from "./pages/dashboard/ServicePromotion";
 import AdminDashboard from "./pages/AdminDashboard";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -40,14 +41,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Páginas públicas */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard-alt" element={<DashboardAlt />} />
           <Route path="/services" element={<Services />} />
-          <Route path="/dashboard/services" element={<UserServices />} />
-          <Route path="/dashboard/client-services" element={<ClientServices />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/services/:id" element={<ServiceDetail />} />
@@ -57,6 +55,31 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/cookies" element={<Cookies />} />
+          
+          {/* Páginas do dashboard */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard-alt" element={<DashboardAlt />} />
+          
+          {/* Páginas de perfil e serviços do usuário */}
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/user-services" element={<UserServices />} />
+          <Route path="/client-services" element={<ClientServices />} />
+          <Route path="/customers" element={<Customers />} />
+          <Route path="/messages" element={<Messages />} />
+          
+          {/* Páginas de pagamentos */}
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/payments/:id" element={<PaymentDetail />} />
+          
+          {/* Outras páginas */}
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/services/promote/:id" element={<ServicePromotion />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          
+          {/* Rotas do Dashboard (mantidas para compatibilidade) */}
+          <Route path="/dashboard/services" element={<UserServices />} />
+          <Route path="/dashboard/client-services" element={<ClientServices />} />
           <Route path="/dashboard/customers" element={<Customers />} />
           <Route path="/dashboard/messages" element={<Messages />} />
           <Route path="/dashboard/payments" element={<Payments />} />
@@ -64,8 +87,8 @@ const App = () => (
           <Route path="/dashboard/analytics" element={<Analytics />} />
           <Route path="/dashboard/settings" element={<Settings />} />
           <Route path="/dashboard/services/promote/:id" element={<ServicePromotion />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          
+          {/* Rota 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
