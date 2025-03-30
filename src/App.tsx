@@ -24,6 +24,7 @@ import Cookies from "./pages/Cookies";
 import Customers from "./pages/dashboard/Customers";
 import Messages from "./pages/dashboard/Messages";
 import Payments from "./pages/dashboard/Payments";
+import PaymentDetail from "./pages/dashboard/PaymentDetail";
 import Analytics from "./pages/dashboard/Analytics";
 import Settings from "./pages/dashboard/Settings";
 import ServicePromotion from "./pages/dashboard/ServicePromotion";
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/dashboard/customers" element={<Customers />} />
           <Route path="/dashboard/messages" element={<Messages />} />
           <Route path="/dashboard/payments" element={<Payments />} />
+          <Route path="/dashboard/payments/:id" element={<PaymentDetail />} />
           <Route path="/dashboard/analytics" element={<Analytics />} />
           <Route path="/dashboard/settings" element={<Settings />} />
           <Route path="/dashboard/services/promote/:id" element={<ServicePromotion />} />
