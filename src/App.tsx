@@ -25,6 +25,7 @@ import Messages from "./pages/dashboard/Messages";
 import Payments from "./pages/dashboard/Payments";
 import Analytics from "./pages/dashboard/Analytics";
 import Settings from "./pages/dashboard/Settings";
+import ServicePromotion from "./pages/dashboard/ServicePromotion";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
           <Route path="/dashboard/payments" element={<Payments />} />
           <Route path="/dashboard/analytics" element={<Analytics />} />
           <Route path="/dashboard/settings" element={<Settings />} />
+          <Route path="/dashboard/services/promote/:id" element={<ServicePromotion />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   User, Home, Briefcase, MessageSquare, Heart, Settings, 
@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import NotificationCenter from '@/components/NotificationCenter';
+import { useNotifications } from '@/hooks/use-notifications';
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -50,6 +52,13 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [activeTab, setActiveTab] = useState('overview');
   const location = useLocation();
+  const { 
+    notifications, 
+    markAsRead, 
+    markAllAsRead, 
+    deleteNotification, 
+    unreadCount 
+  } = useNotifications('user1'); // Usar ID do usuário real em produção
   
   // Determine active tab based on URL path
   React.useEffect(() => {
@@ -108,7 +117,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             href="/dashboard/messages"
             active={activeTab === 'messages'}
             onClick={() => setActiveTab('messages')}
-            badge="3"
+            badge={unreadCount > 0 ? `${unreadCount}` : undefined}
           />
           <SidebarItem
             icon={<DollarSign className="h-4 w-4" />}
@@ -177,16 +186,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </div>
           
           <div className="flex items-center ml-auto gap-4">
-            <Button variant="outline" size="icon" asChild>
-              <Link to="/dashboard/messages">
-                <span className="relative">
-                  <Bell className="h-4 w-4" />
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">
-                    3
-                  </span>
-                </span>
-              </Link>
-            </Button>
+            <NotificationCenter 
+              notifications={notifications} 
+              onMarkAsRead={markAsRead}
+              onMarkAllAsRead={markAllAsRead}
+              onDelete={deleteNotification}
+            />
             
             <Button variant="ghost" className="gap-2" asChild>
               <Link to="/dashboard/profile" className="flex items-center gap-2">

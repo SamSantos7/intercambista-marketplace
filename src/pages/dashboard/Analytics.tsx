@@ -1,34 +1,7 @@
 
-import React from 'react';
-import { 
-  ArrowDown, 
-  ArrowUp, 
-  Calendar,
-  ChevronDown,
-  Download,
-  Users,
-  CreditCard,
-  TrendingUp,
-  CheckCircle2,
-  Clock
-} from 'lucide-react';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend
-} from 'recharts';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Card,
   CardContent,
@@ -36,416 +9,475 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { 
+  BarChart2, 
+  TrendingUp, 
+  DollarSign, 
+  Users, 
+  Calendar, 
+  Download,
+  Clock
+} from 'lucide-react';
+import StatCard from '@/components/dashboard/StatCard';
+import AnalyticsChart from '@/components/dashboard/AnalyticsChart';
 
-// Mock data for charts
-const revenueData = [
-  { month: 'Jan', revenue: 1200 },
-  { month: 'Feb', revenue: 1900 },
-  { month: 'Mar', revenue: 1600 },
-  { month: 'Apr', revenue: 2100 },
-  { month: 'May', revenue: 1800 },
-  { month: 'Jun', revenue: 2400 },
-  { month: 'Jul', revenue: 2200 },
+// Mock data
+const areaChartData = [
+  { month: 'Jan', serviços: 20, ganhos: 1200 },
+  { month: 'Fev', serviços: 15, ganhos: 900 },
+  { month: 'Mar', serviços: 25, ganhos: 1500 },
+  { month: 'Abr', serviços: 30, ganhos: 1800 },
+  { month: 'Mai', serviços: 22, ganhos: 1320 },
+  { month: 'Jun', serviços: 28, ganhos: 1680 },
+  { month: 'Jul', serviços: 35, ganhos: 2100 },
 ];
 
-const clientsData = [
-  { month: 'Jan', clients: 5 },
-  { month: 'Feb', clients: 8 },
-  { month: 'Mar', clients: 12 },
-  { month: 'Apr', clients: 15 },
-  { month: 'May', clients: 18 },
-  { month: 'Jun', clients: 24 },
-  { month: 'Jul', clients: 28 },
+const pieChartData = [
+  { name: 'Tradução', value: 45 },
+  { name: 'Acompanhamento', value: 25 },
+  { name: 'Documentação', value: 15 },
+  { name: 'Outros', value: 15 },
 ];
 
-const serviceData = [
-  { name: 'Aulas de Português', value: 40 },
-  { name: 'Tradução de Documentos', value: 25 },
-  { name: 'Design de Sites', value: 15 },
-  { name: 'Marketing Digital', value: 10 },
-  { name: 'Outros', value: 10 },
+const barChartData = [
+  { name: 'Seg', clientes: 10, concluídos: 7 },
+  { name: 'Ter', clientes: 15, concluídos: 10 },
+  { name: 'Qua', clientes: 12, concluídos: 8 },
+  { name: 'Qui', clientes: 18, concluídos: 12 },
+  { name: 'Sex', clientes: 20, concluídos: 15 },
+  { name: 'Sab', clientes: 8, concluídos: 6 },
+  { name: 'Dom', clientes: 5, concluídos: 3 },
 ];
 
-const chartColors = ['#8B5CF6', '#D946EF', '#F97316', '#0EA5E9', '#8A898C'];
-
-const trafficSources = [
-  { source: 'Pesquisa Orgânica', percentage: 45, value: 380 },
-  { source: 'Redes Sociais', percentage: 30, value: 253 },
-  { source: 'Indicações', percentage: 15, value: 126 },
-  { source: 'Email Marketing', percentage: 10, value: 84 },
+const statusData = [
+  { name: 'Pendentes', value: 8 },
+  { name: 'Em andamento', value: 15 },
+  { name: 'Concluídos', value: 42 },
+  { name: 'Cancelados', value: 3 },
 ];
 
 const Analytics = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
             <p className="text-muted-foreground">
-              Métricas e análises sobre o desempenho dos seus serviços
+              Acompanhe seu desempenho e tome decisões baseadas em dados.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Select defaultValue="month">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Período" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="week">Esta Semana</SelectItem>
-                <SelectItem value="month">Este Mês</SelectItem>
-                <SelectItem value="quarter">Este Trimestre</SelectItem>
-                <SelectItem value="year">Este Ano</SelectItem>
-                <SelectItem value="all">Todo Período</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline">
-              <Calendar className="mr-2 h-4 w-4" />
-              <span>Jun 01 - Jun 30</span>
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Exportar
-            </Button>
-          </div>
+          <Button variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Exportar Relatório
+          </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Faturamento Total</p>
-                  <h3 className="text-2xl font-bold mt-1">R$ 12.450,00</h3>
-                </div>
-                <div className="bg-primary/10 text-primary rounded-lg p-2">
-                  <TrendingUp className="h-5 w-5" />
-                </div>
+        <Tabs
+          defaultValue="overview"
+          value={activeTab}
+          onValueChange={setActiveTab}
+        >
+          <TabsList>
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="services">Serviços</TabsTrigger>
+            <TabsTrigger value="clients">Clientes</TabsTrigger>
+            <TabsTrigger value="payments">Pagamentos</TabsTrigger>
+          </TabsList>
+
+          <div className="mt-6 grid gap-6">
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard
+                  title="Total de Ganhos"
+                  value="R$ 8.450,00"
+                  icon={<DollarSign className="h-4 w-4" />}
+                  description="Receita dos últimos 30 dias"
+                  trend={{ value: 12.5, isPositive: true }}
+                />
+                <StatCard
+                  title="Serviços Prestados"
+                  value="68"
+                  icon={<BarChart2 className="h-4 w-4" />}
+                  description="Total deste mês"
+                  trend={{ value: 8.2, isPositive: true }}
+                />
+                <StatCard
+                  title="Novos Clientes"
+                  value="24"
+                  icon={<Users className="h-4 w-4" />}
+                  description="Últimos 30 dias"
+                  trend={{ value: 5.1, isPositive: true }}
+                />
+                <StatCard
+                  title="Taxa de Conclusão"
+                  value="92%"
+                  icon={<TrendingUp className="h-4 w-4" />}
+                  description="Serviços concluídos vs cancelados"
+                  trend={{ value: 1.2, isPositive: true }}
+                />
               </div>
-              <div className="flex items-center mt-3">
-                <span className="inline-flex items-center text-sm font-medium gap-1 text-green-600">
-                  <ArrowUp className="h-3.5 w-3.5" />
-                  18%
-                </span>
-                <span className="text-sm text-muted-foreground ml-2">em relação ao mês passado</span>
+
+              <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+                <AnalyticsChart
+                  title="Serviços e Ganhos"
+                  description="Serviços prestados e ganhos nos últimos 7 meses"
+                  type="area"
+                  data={areaChartData}
+                  dataKeys={{
+                    x: 'month',
+                    y: ['serviços', 'ganhos'],
+                  }}
+                />
+                <AnalyticsChart
+                  title="Distribuição por Tipo de Serviço"
+                  description="Quais são seus serviços mais populares"
+                  type="pie"
+                  data={pieChartData}
+                  dataKeys={{
+                    name: 'name',
+                    value: 'value',
+                  }}
+                />
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Novos Clientes</p>
-                  <h3 className="text-2xl font-bold mt-1">28</h3>
-                </div>
-                <div className="bg-blue-100 text-blue-700 rounded-lg p-2">
-                  <Users className="h-5 w-5" />
-                </div>
+
+              <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+                <AnalyticsChart
+                  title="Atividade Semanal"
+                  description="Novos clientes e serviços concluídos esta semana"
+                  type="bar"
+                  data={barChartData}
+                  dataKeys={{
+                    category: 'name',
+                    y: ['clientes', 'concluídos'],
+                  }}
+                />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Status dos Serviços</CardTitle>
+                    <CardDescription>Visão geral dos seus serviços ativos</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <AnalyticsChart
+                      title=""
+                      type="pie"
+                      data={statusData}
+                      dataKeys={{
+                        name: 'name',
+                        value: 'value',
+                      }}
+                    />
+                  </CardContent>
+                </Card>
               </div>
-              <div className="flex items-center mt-3">
-                <span className="inline-flex items-center text-sm font-medium gap-1 text-green-600">
-                  <ArrowUp className="h-3.5 w-3.5" />
-                  12%
-                </span>
-                <span className="text-sm text-muted-foreground ml-2">em relação ao mês passado</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Taxa de Conversão</p>
-                  <h3 className="text-2xl font-bold mt-1">64.5%</h3>
-                </div>
-                <div className="bg-green-100 text-green-700 rounded-lg p-2">
-                  <CheckCircle2 className="h-5 w-5" />
-                </div>
-              </div>
-              <div className="flex items-center mt-3">
-                <span className="inline-flex items-center text-sm font-medium gap-1 text-green-600">
-                  <ArrowUp className="h-3.5 w-3.5" />
-                  5.2%
-                </span>
-                <span className="text-sm text-muted-foreground ml-2">em relação ao mês passado</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Tempo Médio de Resposta</p>
-                  <h3 className="text-2xl font-bold mt-1">2h 15min</h3>
-                </div>
-                <div className="bg-amber-100 text-amber-700 rounded-lg p-2">
-                  <Clock className="h-5 w-5" />
-                </div>
-              </div>
-              <div className="flex items-center mt-3">
-                <span className="inline-flex items-center text-sm font-medium gap-1 text-red-600">
-                  <ArrowDown className="h-3.5 w-3.5" />
-                  12%
-                </span>
-                <span className="text-sm text-muted-foreground ml-2">melhoria em relação ao mês passado</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Main Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Receita Mensal</CardTitle>
-              <CardDescription>
-                Análise da receita nos últimos 7 meses
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => [`R$ ${value}`, 'Receita']} />
-                  <Legend />
-                  <Line type="monotone" dataKey="revenue" stroke="#8B5CF6" strokeWidth={2} activeDot={{ r: 8 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Novos Clientes</CardTitle>
-              <CardDescription>
-                Crescimento de novos clientes ao longo do tempo
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={clientsData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => [`${value} clientes`, 'Novos Clientes']} />
-                  <Legend />
-                  <Bar dataKey="clients" fill="#0EA5E9" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Secondary Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Distribuição de Serviços</CardTitle>
-              <CardDescription>
-                Proporção de vendas por tipo de serviço
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={serviceData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {serviceData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value}%`, 'Porcentagem']} />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-          
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Fontes de Tráfego</CardTitle>
-              <CardDescription>
-                De onde vêm seus clientes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {trafficSources.map((source, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{source.source}</span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-muted text-foreground">
-                          {source.value} visitas
-                        </Badge>
-                        <span className="font-medium">{source.percentage}%</span>
+            </TabsContent>
+
+            <TabsContent value="services" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Desempenho dos Serviços</CardTitle>
+                  <CardDescription>
+                    Performance detalhada de cada serviço oferecido
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Esta seção mostrará métricas detalhadas para cada serviço individual que você oferece.
+                  </p>
+                  
+                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Tradução de Documentos</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Solicitações</span>
+                            <span className="font-medium">32</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Concluídos</span>
+                            <span className="font-medium">28</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Avaliação média</span>
+                            <span className="font-medium">4.8/5</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Receita</span>
+                            <span className="font-medium">R$ 3.360,00</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Acompanhamento de Vistos</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Solicitações</span>
+                            <span className="font-medium">18</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Concluídos</span>
+                            <span className="font-medium">15</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Avaliação média</span>
+                            <span className="font-medium">4.6/5</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Receita</span>
+                            <span className="font-medium">R$ 2.700,00</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Auxílio com Documentação</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Solicitações</span>
+                            <span className="font-medium">25</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Concluídos</span>
+                            <span className="font-medium">22</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Avaliação média</span>
+                            <span className="font-medium">4.7/5</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Receita</span>
+                            <span className="font-medium">R$ 2.200,00</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="clients" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Análise de Clientes</CardTitle>
+                  <CardDescription>
+                    Informações sobre seus clientes e comportamento
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+                    <div>
+                      <h3 className="font-medium mb-4">Origem dos Clientes</h3>
+                      <AnalyticsChart
+                        title=""
+                        type="pie"
+                        data={[
+                          { name: 'Busca orgânica', value: 45 },
+                          { name: 'Indicação', value: 30 },
+                          { name: 'Redes sociais', value: 15 },
+                          { name: 'Outros', value: 10 },
+                        ]}
+                        dataKeys={{
+                          name: 'name',
+                          value: 'value',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-medium mb-4">Taxa de Retenção</h3>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span>Clientes recorrentes</span>
+                            <span className="font-medium">65%</span>
+                          </div>
+                          <div className="w-full bg-muted rounded-full h-2.5">
+                            <div className="bg-primary h-2.5 rounded-full" style={{ width: '65%' }}></div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span>Novos clientes</span>
+                            <span className="font-medium">35%</span>
+                          </div>
+                          <div className="w-full bg-muted rounded-full h-2.5">
+                            <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: '35%' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-8">
+                        <h4 className="font-medium mb-2">Satisfação do Cliente</h4>
+                        <div className="flex items-center">
+                          <div className="text-3xl font-bold">4.7</div>
+                          <div className="flex ml-2">
+                            {[1, 2, 3, 4].map((star) => (
+                              <svg
+                                key={star}
+                                className="w-5 h-5 text-yellow-400"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 15.585l-5.196 2.73 1.098-6.404-4.658-4.541 6.435-.935L10 1l2.32 4.716 6.435.935-4.658 4.541 1.098 6.404L10 15.585z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            ))}
+                            <svg
+                              className="w-5 h-5 text-yellow-400"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 15.585l-5.196 2.73 1.098-6.404-4.658-4.541 6.435-.935L10 1l2.32 4.716 6.435.935-4.658 4.541 1.098 6.404L10 15.585z"
+                                clipRule="evenodd"
+                                opacity="0.7"
+                              />
+                            </svg>
+                          </div>
+                          <span className="ml-2 text-sm text-muted-foreground">
+                            baseado em 68 avaliações
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <Progress value={source.percentage} className="h-2" />
                   </div>
-                ))}
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Próximas Reuniões</CardTitle>
+                  <CardDescription>Agendamentos com clientes nos próximos dias</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4 p-3 rounded-lg border">
+                      <div className="flex-shrink-0">
+                        <Calendar className="h-10 w-10 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">Consulta sobre visto canadense</p>
+                        <p className="text-sm text-muted-foreground">Maria Oliveira</p>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>Amanhã, 14:00 - 15:00</span>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Ver detalhes
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-start gap-4 p-3 rounded-lg border">
+                      <div className="flex-shrink-0">
+                        <Calendar className="h-10 w-10 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">Tradução de documentos acadêmicos</p>
+                        <p className="text-sm text-muted-foreground">Carlos Mendes</p>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>22/10/2023, 10:30 - 11:30</span>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Ver detalhes
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-start gap-4 p-3 rounded-lg border">
+                      <div className="flex-shrink-0">
+                        <Calendar className="h-10 w-10 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">Revisão de documentação para visto americano</p>
+                        <p className="text-sm text-muted-foreground">Ana Costa</p>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>23/10/2023, 15:00 - 16:30</span>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Ver detalhes
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="payments" className="space-y-4">
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                <StatCard
+                  title="Receita Total"
+                  value="R$ 8.450,00"
+                  icon={<DollarSign className="h-4 w-4" />}
+                  trend={{ value: 12.5, isPositive: true }}
+                />
+                <StatCard
+                  title="Pendente"
+                  value="R$ 2.150,00"
+                  icon={<Clock className="h-4 w-4" />}
+                  trend={{ value: 3.2, isPositive: false }}
+                />
+                <StatCard
+                  title="Concluído"
+                  value="R$ 6.300,00"
+                  icon={<CheckCircle2 className="h-4 w-4" />}
+                  trend={{ value: 8.1, isPositive: true }}
+                />
               </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Analytics Tabs */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance Detalhada</CardTitle>
-            <CardDescription>
-              Análise aprofundada de diferentes métricas
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="overview">
-              <TabsList className="mb-4">
-                <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-                <TabsTrigger value="acquisition">Aquisição</TabsTrigger>
-                <TabsTrigger value="retention">Retenção</TabsTrigger>
-                <TabsTrigger value="revenue">Receita</TabsTrigger>
-              </TabsList>
               
-              <TabsContent value="overview" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-muted/50 p-4 rounded-lg">
-                    <h3 className="font-medium mb-2">Principais Métricas</h3>
-                    <ul className="space-y-2">
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Taxa de Conversão</span>
-                        <span className="font-medium">8.5%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Valor Médio por Pedido</span>
-                        <span className="font-medium">R$ 185,00</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Tempo Médio no Site</span>
-                        <span className="font-medium">4m 32s</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Taxa de Rejeição</span>
-                        <span className="font-medium">24.8%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Novos Registros</span>
-                        <span className="font-medium">128</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-muted/50 p-4 rounded-lg">
-                    <h3 className="font-medium mb-2">Desempenho por Serviço</h3>
-                    <ul className="space-y-2">
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Aulas de Português</span>
-                        <span className="font-medium text-green-600">+24%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Tradução de Documentos</span>
-                        <span className="font-medium text-green-600">+12%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Design de Sites</span>
-                        <span className="font-medium text-amber-600">+5%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Marketing Digital</span>
-                        <span className="font-medium text-green-600">+18%</span>
-                      </li>
-                      <li className="flex justify-between">
-                        <span className="text-muted-foreground">Outros Serviços</span>
-                        <span className="font-medium text-red-600">-3%</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <h3 className="font-medium mb-2">Desempenho Regional</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <p className="text-muted-foreground text-sm">São Paulo</p>
-                      <p className="font-medium">45% dos clientes</p>
-                      <p className="text-sm text-green-600">+12% em relação ao mês passado</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground text-sm">Rio de Janeiro</p>
-                      <p className="font-medium">22% dos clientes</p>
-                      <p className="text-sm text-green-600">+8% em relação ao mês passado</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground text-sm">Belo Horizonte</p>
-                      <p className="font-medium">12% dos clientes</p>
-                      <p className="text-sm text-amber-600">+4% em relação ao mês passado</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground text-sm">Outros</p>
-                      <p className="font-medium">21% dos clientes</p>
-                      <p className="text-sm text-green-600">+15% em relação ao mês passado</p>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="acquisition">
-                <div className="p-4 rounded-lg bg-muted/50 text-center">
-                  <h3 className="text-lg font-medium">Dados de Aquisição</h3>
-                  <p className="text-muted-foreground">
-                    Dados detalhados sobre canais de aquisição serão exibidos aqui.
-                  </p>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="retention">
-                <div className="p-4 rounded-lg bg-muted/50 text-center">
-                  <h3 className="text-lg font-medium">Dados de Retenção</h3>
-                  <p className="text-muted-foreground">
-                    Métricas de retenção de clientes serão exibidas aqui.
-                  </p>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="revenue">
-                <div className="p-4 rounded-lg bg-muted/50 text-center">
-                  <h3 className="text-lg font-medium">Análise de Receita</h3>
-                  <p className="text-muted-foreground">
-                    Análises detalhadas sobre fontes de receita serão exibidas aqui.
-                  </p>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Histórico de Ganhos</CardTitle>
+                  <CardDescription>Receita dos últimos 12 meses</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AnalyticsChart
+                    title=""
+                    type="area"
+                    data={[
+                      { month: 'Out', value: 1500 },
+                      { month: 'Nov', value: 1800 },
+                      { month: 'Dez', value: 2200 },
+                      { month: 'Jan', value: 2000 },
+                      { month: 'Fev', value: 1900 },
+                      { month: 'Mar', value: 2400 },
+                      { month: 'Abr', value: 2800 },
+                      { month: 'Mai', value: 3200 },
+                      { month: 'Jun', value: 3000 },
+                      { month: 'Jul', value: 3400 },
+                      { month: 'Ago', value: 3800 },
+                      { month: 'Set', value: 4200 },
+                    ]}
+                    dataKeys={{
+                      x: 'month',
+                      y: 'value',
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
