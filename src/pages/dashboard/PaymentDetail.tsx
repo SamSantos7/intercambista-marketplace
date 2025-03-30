@@ -7,6 +7,14 @@ import { ArrowLeft, Printer, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import PaymentDetails from '@/components/dashboard/payments/PaymentDetails';
 import { ServicePayment, PaymentStatus } from '@/types/payment';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 const PaymentDetail = () => {
   const { id } = useParams<{ id: string }>();
