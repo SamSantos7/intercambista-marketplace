@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardAlt from "./pages/DashboardAlt";
 import Services from "./pages/Services";
 import UserServices from "./pages/UserServices";
+import ClientServices from "./pages/ClientServices";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import ServiceDetail from "./pages/ServiceDetail";
@@ -26,6 +27,7 @@ import Payments from "./pages/dashboard/Payments";
 import Analytics from "./pages/dashboard/Analytics";
 import Settings from "./pages/dashboard/Settings";
 import ServicePromotion from "./pages/dashboard/ServicePromotion";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,7 @@ const App = () => (
           <Route path="/dashboard-alt" element={<DashboardAlt />} />
           <Route path="/services" element={<Services />} />
           <Route path="/dashboard/services" element={<UserServices />} />
+          <Route path="/dashboard/client-services" element={<ClientServices />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/services/:id" element={<ServiceDetail />} />
@@ -57,6 +60,7 @@ const App = () => (
           <Route path="/dashboard/analytics" element={<Analytics />} />
           <Route path="/dashboard/settings" element={<Settings />} />
           <Route path="/dashboard/services/promote/:id" element={<ServicePromotion />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
