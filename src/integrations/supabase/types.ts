@@ -63,6 +63,116 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          negotiation_id: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          negotiation_id?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          negotiation_id?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_negotiation_id_fkey"
+            columns: ["negotiation_id"]
+            isOneToOne: false
+            referencedRelation: "negotiations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      negotiations: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          offered_price: number
+          original_price: number
+          provider_id: string
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          offered_price: number
+          original_price: number
+          provider_id: string
+          service_id: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          offered_price?: number
+          original_price?: number
+          provider_id?: string
+          service_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "negotiations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "negotiations_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "negotiations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviewers: {
         Row: {
           id: string
@@ -75,6 +185,211 @@ export type Database = {
         Update: {
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          client_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          provider_id: string
+          rating: number
+          service_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          provider_id: string
+          rating: number
+          service_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          provider_id?: string
+          rating?: number
+          service_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          category: string
+          countries: string[]
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          price: number
+          price_brl: number
+          provider_id: string
+          status: string
+          subcategory: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          countries: string[]
+          created_at?: string
+          currency: string
+          description: string
+          id?: string
+          price: number
+          price_brl: number
+          provider_id: string
+          status: string
+          subcategory?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          countries?: string[]
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          price?: number
+          price_brl?: number
+          provider_id?: string
+          status?: string
+          subcategory?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          client_id: string
+          created_at: string
+          id: string
+          payment_method: string
+          provider_id: string
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          created_at?: string
+          id?: string
+          payment_method: string
+          provider_id: string
+          service_id: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          created_at?: string
+          id?: string
+          payment_method?: string
+          provider_id?: string
+          service_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          country: string
+          created_at: string
+          description: string | null
+          email: string
+          full_name: string
+          id: string
+          profile_image: string | null
+          updated_at: string
+          user_type: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          description?: string | null
+          email: string
+          full_name: string
+          id: string
+          profile_image?: string | null
+          updated_at?: string
+          user_type: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          profile_image?: string | null
+          updated_at?: string
+          user_type?: string
         }
         Relationships: []
       }

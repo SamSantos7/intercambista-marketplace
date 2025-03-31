@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,8 +24,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 // Validação do formulário
 const loginSchema = z.object({
@@ -39,6 +41,7 @@ const AdminLogin = () => {
   const { signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -51,32 +54,35 @@ const AdminLogin = () => {
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
       setIsLoading(true);
+      setAuthError(null);
+      
       const { error } = await signIn(values.email, values.password);
       
       if (error) {
-        toast({
-          title: "Falha no login",
-          description: "E-mail ou senha inválidos. Tente novamente.",
-          variant: "destructive",
-        });
+        setAuthError(
+          error.message === 'Invalid login credentials'
+            ? 'E-mail ou senha incorretos'
+            : error.message
+        );
         return;
       }
       
       // Verificar se o usuário é um administrador
-      // Na implementação real, isso deve ser verificado corretamente
-      const { data: userData } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from('users')
         .select('user_type')
         .eq('email', values.email)
         .single();
       
+      if (userError) {
+        setAuthError("Erro ao verificar tipo de usuário");
+        // Fazer logout para evitar acesso indevido
+        await supabase.auth.signOut();
+        return;
+      }
+      
       if (userData?.user_type !== 'admin') {
-        toast({
-          title: "Acesso negado",
-          description: "Você não tem permissão de administrador.",
-          variant: "destructive",
-        });
-        
+        setAuthError("Você não tem permissão de administrador");
         // Fazer logout para evitar acesso indevido
         await supabase.auth.signOut();
         return;
@@ -91,11 +97,7 @@ const AdminLogin = () => {
       navigate('/admin');
     } catch (error) {
       console.error("Erro no login:", error);
-      toast({
-        title: "Falha no login",
-        description: "Ocorreu um erro ao tentar fazer login. Tente novamente.",
-        variant: "destructive",
-      });
+      setAuthError("Ocorreu um erro ao tentar fazer login. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -122,6 +124,14 @@ const AdminLogin = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <CardContent className="space-y-4 pt-6">
+                {/* Error Alert */}
+                {authError && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{authError}</AlertDescription>
+                  </Alert>
+                )}
+              
                 {/* E-mail */}
                 <FormField
                   control={form.control}
@@ -130,7 +140,7 @@ const AdminLogin = () => {
                     <FormItem>
                       <FormLabel>E-mail de Administrador</FormLabel>
                       <FormControl>
-                        <Input placeholder="admin@exemplo.com" {...field} />
+                        <Input placeholder="admin@exemplo.com" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -150,6 +160,7 @@ const AdminLogin = () => {
                             type={showPassword ? "text" : "password"} 
                             placeholder="Digite sua senha"
                             {...field}
+                            disabled={isLoading}
                           />
                         </FormControl>
                         <Button
@@ -158,6 +169,7 @@ const AdminLogin = () => {
                           size="icon"
                           className="absolute right-0 top-0"
                           onClick={() => setShowPassword(!showPassword)}
+                          disabled={isLoading}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </Button>

@@ -12,25 +12,6 @@ const AuthCallback = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        // Check if this is a new user via OAuth (lacks a profile)
-        const { data: existingProfile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-          
-        if (!existingProfile) {
-          // Create a new profile for the OAuth user
-          await supabase.from('users').insert({
-            id: session.user.id,
-            email: session.user.email,
-            full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || 'Usuário',
-            user_type: 'client', // Default to client for OAuth users
-            country: 'Brasil', // Default country
-            created_at: new Date().toISOString()
-          });
-        }
-        
         // Redirect to dashboard
         navigate('/dashboard');
       } else {

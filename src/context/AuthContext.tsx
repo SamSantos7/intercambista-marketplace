@@ -75,13 +75,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single();
 
       if (error) {
-        console.error('Error loading user profile:', error);
+        console.error('Erro ao carregar perfil do usuário:', error);
       } else if (data) {
         // Store user profile data if needed
-        console.log('User profile loaded:', data);
+        console.log('Perfil do usuário carregado:', data);
       }
     } catch (error) {
-      console.error('Error in loadUserProfile:', error);
+      console.error('Erro em loadUserProfile:', error);
     }
   };
 
@@ -122,23 +122,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { data: null, error: authError };
       }
       
-      // Create user profile in the users table
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            id: authData.user.id,
-            email: email,
-            full_name: userData.fullName,
-            country: userData.country,
-            user_type: userData.userType,
-            description: userData.description || ''
-          });
-          
-        if (profileError) {
-          return { data: null, error: profileError };
-        }
-      }
+      // O perfil do usuário é criado automaticamente pelo trigger no Supabase
       
       return { data: authData, error: null };
     } catch (error) {
@@ -176,7 +160,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const updateProfile = async (data: any) => {
     try {
       if (!user) {
-        throw new Error('User not authenticated');
+        throw new Error('Usuário não autenticado');
       }
       
       const { error } = await supabase
@@ -208,7 +192,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 };
