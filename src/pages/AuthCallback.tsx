@@ -8,15 +8,41 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      // Check if we have a session
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        // Redirect to dashboard
-        navigate('/dashboard');
-      } else {
-        // If no session, go back to login
-        navigate('/login');
+      try {
+        // Verificar se temos uma sessão
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Erro ao obter sessão:', error);
+          navigate('/login?error=session_error');
+          return;
+        }
+        
+        if (session) {
+          // Obter dados do usuário para verificar o tipo (admin ou regular)
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('user_type')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (userError) {
+            console.error('Erro ao obter tipo de usuário:', userError);
+          }
+          
+          // Redirecionar com base no tipo de usuário
+          if (userData?.user_type === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/dashboard');
+          }
+        } else {
+          // Se não houver sessão, voltar para login
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error('Erro ao processar callback:', error);
+        navigate('/login?error=auth_error');
       }
     };
 

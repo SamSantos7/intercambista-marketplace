@@ -1,203 +1,140 @@
 
-import { useState, useEffect } from 'react';
-import { Notification, NotificationType, NotificationPriority } from '@/types/notification';
+import { useState, useCallback, useMemo } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Notification } from '@/types/notification';
 
-// Mock de notificações para testes
+// Mock de notificações até implementarmos completamente com Supabase
 const mockNotifications: Notification[] = [
   {
     id: '1',
-    userId: 'user1',
-    title: 'Nova mensagem recebida',
-    message: 'João Silva enviou uma mensagem sobre seu serviço de tradução.',
+    title: 'Nova mensagem',
+    content: 'Você recebeu uma nova mensagem de João Silva',
     type: 'message',
-    priority: 'medium',
     read: false,
-    actionUrl: '/dashboard/messages',
-    createdAt: new Date(Date.now() - 1000 * 60 * 5), // 5 minutos atrás
+    createdAt: new Date().toISOString(),
+    userId: 'user1'
   },
   {
     id: '2',
-    userId: 'user1',
     title: 'Pagamento recebido',
-    message: 'Você recebeu um pagamento de R$ 150,00 do serviço de tradução.',
+    content: 'Seu pagamento de R$ 150,00 foi confirmado',
     type: 'payment',
-    priority: 'high',
-    read: false,
-    actionUrl: '/dashboard/payments',
-    createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutos atrás
+    read: true,
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+    userId: 'user1'
   },
   {
     id: '3',
-    userId: 'user1',
-    title: 'Nova solicitação de serviço',
-    message: 'Maria Oliveira solicitou o serviço de auxílio com documentação.',
-    type: 'service_request',
-    priority: 'high',
+    title: 'Novo serviço',
+    content: 'Seu serviço "Aulas de inglês" foi aprovado',
+    type: 'service',
     read: false,
-    actionUrl: '/dashboard/services',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 horas atrás
-  },
-  {
-    id: '4',
-    userId: 'user1',
-    title: 'Serviço concluído',
-    message: 'O serviço de tradução para Pedro Santos foi marcado como concluído.',
-    type: 'service_update',
-    priority: 'medium',
-    read: true,
-    actionUrl: '/dashboard/services',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 dia atrás
-  },
-  {
-    id: '5',
-    userId: 'user1',
-    title: 'Atualização do sistema',
-    message: 'Nossa plataforma foi atualizada com novos recursos. Confira as novidades!',
-    type: 'system',
-    priority: 'low',
-    read: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 dias atrás
-  },
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+    userId: 'user1'
+  }
 ];
 
-export const useNotifications = (userId: string) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+export const useNotifications = () => {
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Carregar notificações
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        // Em produção, isso seria uma chamada real à API
-        // const response = await fetch(`/api/notifications?userId=${userId}`);
-        // const data = await response.json();
-        
-        // Usando mock para demonstração
-        const data = mockNotifications.filter(n => n.userId === userId);
-        
-        // Simular um pequeno delay para parecer uma chamada real
-        setTimeout(() => {
-          setNotifications(data);
-          setLoading(false);
-        }, 500);
-      } catch (err) {
-        console.error('Erro ao carregar notificações:', err);
-        setError(err as Error);
-        setLoading(false);
-      }
-    };
+  // Calcular contagem de não lidas
+  const unreadCount = useMemo(() => {
+    return notifications.filter(notification => !notification.read).length;
+  }, [notifications]);
 
-    fetchNotifications();
+  // Buscar notificações
+  const fetchNotifications = useCallback(async () => {
+    if (!user) return;
     
-    // Configurar polling para novas notificações a cada minuto
-    const interval = setInterval(fetchNotifications, 60000);
+    setLoading(true);
+    setError(null);
     
-    return () => clearInterval(interval);
-  }, [userId]);
+    try {
+      // TODO: Implementar integração real com Supabase
+      // Por enquanto estamos usando dados mockados
+      
+      // Simulando um delay de rede
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // No futuro, seria algo assim:
+      // const { data, error } = await supabase
+      //   .from('notifications')
+      //   .select('*')
+      //   .eq('user_id', user.id)
+      //   .order('created_at', { ascending: false });
+      
+      setNotifications(mockNotifications);
+    } catch (err) {
+      console.error('Erro ao buscar notificações:', err);
+      setError('Não foi possível carregar as notificações');
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   // Marcar uma notificação como lida
-  const markAsRead = async (id: string) => {
+  const markAsRead = useCallback(async (id: string) => {
+    if (!user) return;
+    
     try {
-      // Em produção, seria uma chamada à API
-      // await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+      // TODO: Implementar integração real com Supabase
+      // Por enquanto estamos atualizando apenas o estado local
       
-      setNotifications(prevNotifications =>
-        prevNotifications.map(notification =>
-          notification.id === id
-            ? { ...notification, read: true }
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === id 
+            ? { ...notification, read: true } 
             : notification
         )
       );
       
-      return true;
+      // No futuro, seria algo assim:
+      // await supabase
+      //   .from('notifications')
+      //   .update({ read: true })
+      //   .eq('id', id)
+      //   .eq('user_id', user.id);
+      
     } catch (err) {
       console.error('Erro ao marcar notificação como lida:', err);
-      return false;
     }
-  };
+  }, [user]);
 
   // Marcar todas as notificações como lidas
-  const markAllAsRead = async () => {
+  const markAllAsRead = useCallback(async () => {
+    if (!user) return;
+    
     try {
-      // Em produção, seria uma chamada à API
-      // await fetch(`/api/notifications/read-all?userId=${userId}`, { method: 'PUT' });
+      // TODO: Implementar integração real com Supabase
+      // Por enquanto estamos atualizando apenas o estado local
       
-      setNotifications(prevNotifications =>
-        prevNotifications.map(notification => ({ ...notification, read: true }))
+      setNotifications(prev => 
+        prev.map(notification => ({ ...notification, read: true }))
       );
       
-      return true;
+      // No futuro, seria algo assim:
+      // await supabase
+      //   .from('notifications')
+      //   .update({ read: true })
+      //   .eq('user_id', user.id)
+      //   .eq('read', false);
+      
     } catch (err) {
-      console.error('Erro ao marcar todas as notificações como lidas:', err);
-      return false;
+      console.error('Erro ao marcar todas notificações como lidas:', err);
     }
-  };
-
-  // Excluir uma notificação
-  const deleteNotification = async (id: string) => {
-    try {
-      // Em produção, seria uma chamada à API
-      // await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
-      
-      setNotifications(prevNotifications =>
-        prevNotifications.filter(notification => notification.id !== id)
-      );
-      
-      return true;
-    } catch (err) {
-      console.error('Erro ao excluir notificação:', err);
-      return false;
-    }
-  };
-
-  // Adicionar uma nova notificação
-  const addNotification = async (
-    title: string,
-    message: string,
-    type: NotificationType,
-    priority: NotificationPriority = 'medium',
-    actionUrl?: string
-  ) => {
-    try {
-      // Em produção, seria uma chamada à API
-      // const response = await fetch('/api/notifications', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ userId, title, message, type, priority, actionUrl })
-      // });
-      // const data = await response.json();
-      
-      // Criar uma nova notificação local para demonstração
-      const newNotification: Notification = {
-        id: `temp-${Date.now()}`,
-        userId,
-        title,
-        message,
-        type,
-        priority,
-        read: false,
-        actionUrl,
-        createdAt: new Date(),
-      };
-      
-      setNotifications(prevNotifications => [newNotification, ...prevNotifications]);
-      
-      return newNotification;
-    } catch (err) {
-      console.error('Erro ao adicionar notificação:', err);
-      return null;
-    }
-  };
+  }, [user]);
 
   return {
     notifications,
+    unreadCount,
     loading,
     error,
+    fetchNotifications,
     markAsRead,
-    markAllAsRead,
-    deleteNotification,
-    addNotification,
-    unreadCount: notifications.filter(n => !n.read).length,
+    markAllAsRead
   };
 };

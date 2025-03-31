@@ -1,42 +1,14 @@
 
-export type NotificationPriority = 'high' | 'medium' | 'low';
-
-export type NotificationType = 
-  | 'message'
-  | 'payment'
-  | 'service_request'
-  | 'service_update'
-  | 'account'
-  | 'system';
+export type NotificationType = 'message' | 'payment' | 'service' | 'review' | 'system';
 
 export interface Notification {
   id: string;
-  userId: string;
   title: string;
-  message: string;
+  content: string;
   type: NotificationType;
-  priority: NotificationPriority;
   read: boolean;
-  actionUrl?: string;
-  createdAt: Date;
-}
-
-export interface NotificationPreferences {
-  email: {
-    messages: boolean;
-    payments: boolean;
-    serviceUpdates: boolean;
-    marketing: boolean;
-  };
-  push: {
-    messages: boolean;
-    payments: boolean;
-    serviceUpdates: boolean;
-  };
-  inApp: {
-    messages: boolean;
-    payments: boolean;
-    serviceUpdates: boolean;
-    marketing: boolean;
-  };
+  createdAt: string;
+  userId: string;
+  linkTo?: string;
+  metadata?: Record<string, any>;
 }

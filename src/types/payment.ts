@@ -1,36 +1,7 @@
 
-export type PaymentStatus = 
-  | 'pending'
-  | 'completed'
-  | 'cancelled'
-  | 'refunded'
-  | 'failed'
-  | 'held'
-  | 'processing'
-  | 'disputed';
+export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded' | 'cancelled' | 'disputed' | 'held';
 
-export type PaymentMethod = 
-  | 'credit_card'
-  | 'bank_transfer'
-  | 'pix'
-  | 'wallet'
-  | 'paypal'
-  | 'boleto';
-
-export type CurrencyCode = 'BRL' | 'EUR' | 'USD' | 'CAD' | 'AUD' | 'AED' | 'GBP';
-
-export interface Currency {
-  code: CurrencyCode;
-  symbol: string;
-  name: string;
-}
-
-export interface PaymentMethodType {
-  id: string;
-  name: string;
-  icon: string;
-  availableFor: CurrencyCode[];
-}
+export type PaymentMethod = 'credit_card' | 'debit_card' | 'pix' | 'bank_transfer' | 'wallet' | 'paypal';
 
 export interface ServicePayment {
   id: string;
@@ -38,20 +9,16 @@ export interface ServicePayment {
   clientId: string;
   providerId: string;
   amount: number;
-  currency?: CurrencyCode;
+  currency: string;
   status: PaymentStatus;
-  paymentMethod: PaymentMethod;
+  paymentMethod: string;
   createdAt: Date;
   updatedAt: Date;
   scheduledDate?: Date;
-}
-
-export interface PaymentRequest {
-  serviceId: string;
-  clientId: string;
-  providerId: string;
-  amount: number;
-  currency: CurrencyCode;
-  paymentMethod: PaymentMethod;
-  scheduledDate?: Date;
+  completedDate?: Date;
+  refundedDate?: Date;
+  disputeDate?: Date;
+  disputeReason?: string;
+  refundReason?: string;
+  cancelReason?: string;
 }

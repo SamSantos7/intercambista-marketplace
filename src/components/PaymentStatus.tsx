@@ -1,20 +1,34 @@
 
 import React, { useState } from 'react';
-import { PaymentStatus as PaymentStatusType } from '@/types/payment';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Ban,
+  RefreshCw,
+  Shield,
+  CreditCard,
+  HelpCircle
+} from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, Clock, AlertCircle, Ban, HelpCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { PaymentStatus as PaymentStatusType } from '@/types/payment';
 
 interface PaymentStatusProps {
   paymentId: string;
@@ -35,213 +49,232 @@ const PaymentStatus: React.FC<PaymentStatusProps> = ({
   serviceTitle,
   serviceDateStr,
   isProvider,
-  onStatusChange,
+  onStatusChange
 }) => {
-  const { toast } = useToast();
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [isDisputeDialogOpen, setIsDisputeDialogOpen] = useState(false);
-  const [disputeReason, setDisputeReason] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogAction, setDialogAction] = useState<PaymentStatusType | null>(null);
+  const [reason, setReason] = useState('');
 
-  const getStatusDetails = () => {
+  const handleAction = (action: PaymentStatusType) => {
+    if (action === 'dispute' || action === 'refund' || action === 'cancel') {
+      setDialogAction(action);
+      setDialogOpen(true);
+    } else {
+      onStatusChange(paymentId, action);
+    }
+  };
+
+  const confirmAction = () => {
+    if (dialogAction) {
+      onStatusChange(paymentId, dialogAction, reason);
+      setDialogOpen(false);
+      setReason('');
+      setDialogAction(null);
+    }
+  };
+
+  const getStatusConfig = () => {
     switch (status) {
       case 'pending':
         return {
-          color: 'bg-yellow-100 text-yellow-800',
-          icon: <Clock className="h-5 w-5" />,
-          label: 'Pendente',
-          description: 'O pagamento está pendente de processamento.'
+          title: 'Pagamento Pendente',
+          description: 'O pagamento está aguardando processamento.',
+          icon: <Clock className="h-5 w-5 text-amber-500" />,
+          color: 'border-amber-200 bg-amber-50',
+          clientActions: [
+            { label: 'Cancelar Pagamento', action: 'cancel', color: 'text-red-500 border-red-200 hover:bg-red-50' }
+          ],
+          providerActions: []
         };
       case 'processing':
         return {
-          color: 'bg-blue-100 text-blue-800',
-          icon: <Clock className="h-5 w-5" />,
-          label: 'Processando',
-          description: 'O pagamento está sendo processado.'
-        };
-      case 'held':
-        return {
-          color: 'bg-purple-100 text-purple-800',
-          icon: <Clock className="h-5 w-5" />,
-          label: 'Retido',
-          description: isProvider 
-            ? 'O valor está retido até que o cliente confirme a conclusão do serviço.' 
-            : 'O valor está retido e será liberado quando você confirmar a conclusão do serviço.'
+          title: 'Processando Pagamento',
+          description: 'O pagamento está sendo processado.',
+          icon: <RefreshCw className="h-5 w-5 text-blue-500" />,
+          color: 'border-blue-200 bg-blue-50',
+          clientActions: [
+            { label: 'Cancelar Pagamento', action: 'cancel', color: 'text-red-500 border-red-200 hover:bg-red-50' }
+          ],
+          providerActions: []
         };
       case 'completed':
         return {
-          color: 'bg-green-100 text-green-800',
-          icon: <CheckCircle2 className="h-5 w-5" />,
-          label: 'Concluído',
-          description: 'O serviço foi concluído e o pagamento liberado.'
+          title: 'Pagamento Concluído',
+          description: 'O pagamento foi processado com sucesso.',
+          icon: <CheckCircle className="h-5 w-5 text-green-500" />,
+          color: 'border-green-200 bg-green-50',
+          clientActions: [
+            { label: 'Solicitar Reembolso', action: 'refund', color: 'text-red-500 border-red-200 hover:bg-red-50' },
+            { label: 'Abrir Disputa', action: 'dispute', color: 'text-amber-500 border-amber-200 hover:bg-amber-50' }
+          ],
+          providerActions: []
         };
-      case 'disputed':
+      case 'failed':
         return {
-          color: 'bg-red-100 text-red-800',
-          icon: <AlertCircle className="h-5 w-5" />,
-          label: 'Em Disputa',
-          description: 'Existe uma disputa em andamento para este pagamento.'
+          title: 'Pagamento Falhou',
+          description: 'Ocorreu um erro durante o processamento do pagamento.',
+          icon: <AlertCircle className="h-5 w-5 text-red-500" />,
+          color: 'border-red-200 bg-red-50',
+          clientActions: [
+            { label: 'Tentar Novamente', action: 'pending', color: 'text-blue-500 border-blue-200 hover:bg-blue-50' }
+          ],
+          providerActions: []
         };
       case 'refunded':
         return {
-          color: 'bg-gray-100 text-gray-800',
-          icon: <Ban className="h-5 w-5" />,
-          label: 'Reembolsado',
-          description: 'O valor foi reembolsado ao cliente.'
+          title: 'Pagamento Reembolsado',
+          description: 'O valor foi devolvido ao cliente.',
+          icon: <RefreshCw className="h-5 w-5 text-purple-500" />,
+          color: 'border-purple-200 bg-purple-50',
+          clientActions: [],
+          providerActions: []
         };
       case 'cancelled':
         return {
-          color: 'bg-gray-100 text-gray-800',
-          icon: <Ban className="h-5 w-5" />,
-          label: 'Cancelado',
-          description: 'O pagamento foi cancelado.'
+          title: 'Pagamento Cancelado',
+          description: 'O pagamento foi cancelado.',
+          icon: <Ban className="h-5 w-5 text-gray-500" />,
+          color: 'border-gray-200 bg-gray-50',
+          clientActions: [],
+          providerActions: []
+        };
+      case 'disputed':
+        return {
+          title: 'Pagamento em Disputa',
+          description: 'Uma disputa foi aberta para este pagamento.',
+          icon: <Shield className="h-5 w-5 text-amber-500" />,
+          color: 'border-amber-200 bg-amber-50',
+          clientActions: [],
+          providerActions: []
+        };
+      case 'held':
+        return {
+          title: 'Pagamento Retido',
+          description: 'O pagamento está retido até a conclusão do serviço.',
+          icon: <CreditCard className="h-5 w-5 text-indigo-500" />,
+          color: 'border-indigo-200 bg-indigo-50',
+          clientActions: [
+            { label: 'Liberar Pagamento', action: 'completed', color: 'text-green-500 border-green-200 hover:bg-green-50' },
+            { label: 'Abrir Disputa', action: 'dispute', color: 'text-amber-500 border-amber-200 hover:bg-amber-50' }
+          ],
+          providerActions: []
         };
       default:
         return {
-          color: 'bg-gray-100 text-gray-800',
-          icon: <HelpCircle className="h-5 w-5" />,
-          label: 'Desconhecido',
-          description: 'Status desconhecido.'
+          title: 'Status Desconhecido',
+          description: 'O status do pagamento é desconhecido.',
+          icon: <HelpCircle className="h-5 w-5 text-gray-500" />,
+          color: 'border-gray-200 bg-gray-50',
+          clientActions: [],
+          providerActions: []
         };
     }
   };
 
-  const statusDetails = getStatusDetails();
+  const statusConfig = getStatusConfig();
+  const actions = isProvider ? statusConfig.providerActions : statusConfig.clientActions;
 
-  const handleCompleteService = () => {
-    setIsConfirmDialogOpen(false);
-    onStatusChange(paymentId, 'completed');
-    toast({
-      title: "Serviço concluído",
-      description: "O pagamento foi liberado para o prestador de serviço.",
-    });
+  const getDialogTitle = () => {
+    switch (dialogAction) {
+      case 'dispute':
+        return 'Abrir Disputa';
+      case 'refund':
+        return 'Solicitar Reembolso';
+      case 'cancel':
+        return 'Cancelar Pagamento';
+      default:
+        return 'Confirmar Ação';
+    }
   };
 
-  const handleDispute = () => {
-    if (!disputeReason.trim()) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Por favor, descreva o motivo da disputa.",
-        variant: "destructive",
-      });
-      return;
+  const getDialogDescription = () => {
+    switch (dialogAction) {
+      case 'dispute':
+        return 'Por favor, descreva o motivo da disputa com o máximo de detalhes possível.';
+      case 'refund':
+        return 'Por favor, explique o motivo pelo qual você está solicitando um reembolso.';
+      case 'cancel':
+        return 'Por favor, indique o motivo para o cancelamento deste pagamento.';
+      default:
+        return 'Confirme a ação que deseja realizar.';
     }
-    
-    setIsDisputeDialogOpen(false);
-    onStatusChange(paymentId, 'disputed', disputeReason);
-    toast({
-      title: "Disputa iniciada",
-      description: "Nossa equipe analisará seu caso e entrará em contato.",
-    });
-  };
-
-  const renderClientActions = () => {
-    if (status === 'held') {
-      return (
-        <div className="space-x-2">
-          <Button onClick={() => setIsConfirmDialogOpen(true)} variant="default">
-            Confirmar Conclusão
-          </Button>
-          <Button onClick={() => setIsDisputeDialogOpen(true)} variant="outline">
-            Abrir Disputa
-          </Button>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const renderProviderActions = () => {
-    if (status === 'held') {
-      return (
-        <div>
-          <p className="text-sm text-muted-foreground">Aguardando confirmação do cliente</p>
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle>Status do Pagamento</CardTitle>
-          <Badge 
-            className={`${statusDetails.color} flex gap-1 items-center`} 
-            variant="outline"
-          >
-            {statusDetails.icon}
-            {statusDetails.label}
-          </Badge>
-        </div>
-        <CardDescription>{serviceTitle}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex justify-between items-center pb-2 border-b">
-          <span className="text-sm">ID do Pagamento</span>
-          <span className="font-mono text-xs">{paymentId}</span>
-        </div>
-        
-        <div className="flex justify-between items-center pb-2 border-b">
-          <span className="text-sm">Valor</span>
-          <span className="font-semibold">{currency} {amount.toFixed(2)}</span>
-        </div>
-        
-        {serviceDateStr && (
-          <div className="flex justify-between items-center pb-2 border-b">
-            <span className="text-sm">Data do Serviço</span>
-            <span>{serviceDateStr}</span>
+    <>
+      <Card className={`${statusConfig.color} border-2`}>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            {statusConfig.icon}
+            {statusConfig.title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pb-3">
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-medium">Serviço</p>
+              <p className="text-gray-700">{serviceTitle}</p>
+            </div>
+            
+            {serviceDateStr && (
+              <div>
+                <p className="text-sm font-medium">Data do Serviço</p>
+                <p className="text-gray-700">{serviceDateStr}</p>
+              </div>
+            )}
+            
+            <div>
+              <p className="text-sm font-medium">Valor</p>
+              <p className="text-lg font-bold">
+                {new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: currency
+                }).format(amount)}
+              </p>
+            </div>
+            
+            <p className="text-sm text-gray-600">{statusConfig.description}</p>
           </div>
+        </CardContent>
+        
+        {actions.length > 0 && (
+          <CardFooter className="pt-0 flex flex-wrap gap-2">
+            {actions.map((action, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                className={action.color}
+                onClick={() => handleAction(action.action as PaymentStatusType)}
+              >
+                {action.label}
+              </Button>
+            ))}
+          </CardFooter>
         )}
-        
-        <div className="bg-muted p-4 rounded-md">
-          <p className="text-sm">{statusDetails.description}</p>
-        </div>
-      </CardContent>
-      <CardFooter>
-        {isProvider ? renderProviderActions() : renderClientActions()}
-      </CardFooter>
+      </Card>
 
-      {/* Confirm Completion Dialog */}
-      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar Conclusão do Serviço</DialogTitle>
-            <DialogDescription>
-              Ao confirmar a conclusão do serviço, o pagamento será liberado para o prestador. Esta ação não pode ser desfeita.
-            </DialogDescription>
+            <DialogTitle>{getDialogTitle()}</DialogTitle>
+            <DialogDescription>{getDialogDescription()}</DialogDescription>
           </DialogHeader>
+          
+          <Textarea
+            placeholder="Descreva o motivo..."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            className="min-h-[100px]"
+          />
+          
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsConfirmDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleCompleteService}>Confirmar e Liberar Pagamento</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={confirmAction} disabled={!reason.trim()}>Confirmar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      {/* Dispute Dialog */}
-      <Dialog open={isDisputeDialogOpen} onOpenChange={setIsDisputeDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Abrir Disputa</DialogTitle>
-            <DialogDescription>
-              Por favor, descreva detalhadamente o problema com o serviço prestado. Nossa equipe analisará seu caso.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Textarea 
-              placeholder="Descreva o problema com detalhes..." 
-              className="min-h-[120px]"
-              value={disputeReason}
-              onChange={(e) => setDisputeReason(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDisputeDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleDispute} variant="destructive">Abrir Disputa</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </Card>
+    </>
   );
 };
 
