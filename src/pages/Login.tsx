@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +25,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from '@/context/AuthContext';
 
 // Validação do formulário
 const loginSchema = z.object({
@@ -36,7 +38,11 @@ const loginSchema = z.object({
 
 const Login = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user, signIn, signInWithGoogle, signInWithFacebook } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -47,27 +53,64 @@ const Login = () => {
     },
   });
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
-      // Simulação de login bem-sucedido
-      console.log("Login com:", values);
+      setIsLoading(true);
+      setAuthError(null);
+      
+      const { error } = await signIn(values.email, values.password);
+      
+      if (error) {
+        setAuthError(
+          error.message === 'Invalid login credentials'
+            ? 'E-mail ou senha incorretos'
+            : error.message
+        );
+        return;
+      }
       
       toast({
         title: "Login bem-sucedido!",
         description: "Bem-vindo de volta à plataforma.",
       });
       
-      // Redirecionar para o dashboard após login
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1000);
+      // Auth context will handle the redirect
     } catch (error) {
       console.error("Erro no login:", error);
-      toast({
-        title: "Falha no login",
-        description: "E-mail ou senha inválidos. Tente novamente.",
-        variant: "destructive",
-      });
+      setAuthError("Ocorreu um erro ao tentar fazer login. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      setAuthError(null);
+      await signInWithGoogle();
+    } catch (error) {
+      console.error("Erro no login com Google:", error);
+      setAuthError("Ocorreu um erro ao tentar fazer login com Google. Tente novamente.");
+      setIsLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      setIsLoading(true);
+      setAuthError(null);
+      await signInWithFacebook();
+    } catch (error) {
+      console.error("Erro no login com Facebook:", error);
+      setAuthError("Ocorreu um erro ao tentar fazer login com Facebook. Tente novamente.");
+      setIsLoading(false);
     }
   };
 
@@ -92,6 +135,14 @@ const Login = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <CardContent className="space-y-4">
+                {/* Error Alert */}
+                {authError && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{authError}</AlertDescription>
+                  </Alert>
+                )}
+                
                 {/* E-mail */}
                 <FormField
                   control={form.control}
@@ -100,7 +151,7 @@ const Login = () => {
                     <FormItem>
                       <FormLabel>E-mail</FormLabel>
                       <FormControl>
-                        <Input placeholder="seu@email.com" {...field} />
+                        <Input placeholder="seu@email.com" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -120,6 +171,7 @@ const Login = () => {
                             type={showPassword ? "text" : "password"} 
                             placeholder="Digite sua senha"
                             {...field}
+                            disabled={isLoading}
                           />
                         </FormControl>
                         <Button
@@ -128,6 +180,7 @@ const Login = () => {
                           size="icon"
                           className="absolute right-0 top-0"
                           onClick={() => setShowPassword(!showPassword)}
+                          disabled={isLoading}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </Button>
@@ -148,6 +201,7 @@ const Login = () => {
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
+                            disabled={isLoading}
                           />
                         </FormControl>
                         <FormLabel className="text-sm cursor-pointer">Lembrar-me</FormLabel>
@@ -165,8 +219,13 @@ const Login = () => {
               </CardContent>
               
               <CardFooter className="flex flex-col space-y-4">
-                <Button type="submit" className="w-full">
-                  Entrar
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <span className="animate-spin mr-2 h-4 w-4 border-2 border-b-0 border-r-0 rounded-full"></span>
+                      Entrando...
+                    </span>
+                  ) : "Entrar"}
                 </Button>
                 
                 <div className="flex items-center gap-4 text-sm">
@@ -176,11 +235,23 @@ const Login = () => {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <Button variant="outline" type="button" className="gap-2">
+                  <Button 
+                    variant="outline" 
+                    type="button" 
+                    className="gap-2"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                  >
                     <GoogleLogo />
                     Google
                   </Button>
-                  <Button variant="outline" type="button" className="gap-2">
+                  <Button 
+                    variant="outline" 
+                    type="button" 
+                    className="gap-2"
+                    onClick={handleFacebookLogin}
+                    disabled={isLoading}
+                  >
                     <FacebookLogo />
                     Facebook
                   </Button>
@@ -190,6 +261,13 @@ const Login = () => {
                   Ainda não tem uma conta?{' '}
                   <Link to="/register" className="text-primary font-medium hover:underline">
                     Cadastre-se
+                  </Link>
+                </p>
+                
+                <p className="text-center text-sm text-muted-foreground">
+                  Área administrativa?{' '}
+                  <Link to="/admin-login" className="text-primary font-medium hover:underline">
+                    Login de administrador
                   </Link>
                 </p>
               </CardFooter>
@@ -204,10 +282,8 @@ const Login = () => {
 // Ícone do Google
 const GoogleLogo = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18.9 2H5.1A3.1 3.1 0 0 0 2 5.1v13.8A3.1 3.1 0 0 0 5.1 22h13.8a3.1 3.1 0 0 0 3.1-3.1V5.1A3.1 3.1 0 0 0 18.9 2Z" />
-    <path d="m12 19-2-2h2" />
-    <rect x="10" y="5" width="4" height="2" />
-    <circle cx="12" cy="10" r="3" />
+    <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"></path>
+    <path d="M15.5 8.5L12 12m0 0L8.5 15.5M12 12L8.5 8.5M12 12l3.5 3.5"></path>
   </svg>
 );
 

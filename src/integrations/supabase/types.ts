@@ -9,7 +9,75 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      employee_reviews: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          review_text: string
+          reviewer_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          review_text: string
+          reviewer_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          review_text?: string
+          reviewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "reviewers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          id: string
+          name: string
+        }
+        Insert: {
+          id?: string
+          name: string
+        }
+        Update: {
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      reviewers: {
+        Row: {
+          id: string
+          name: string
+        }
+        Insert: {
+          id?: string
+          name: string
+        }
+        Update: {
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
