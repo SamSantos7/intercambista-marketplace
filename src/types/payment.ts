@@ -5,13 +5,17 @@ export type PaymentStatus =
   | 'cancelled'
   | 'refunded'
   | 'failed'
-  | 'held';
+  | 'held'
+  | 'processing'
+  | 'disputed';
 
 export type PaymentMethod = 
   | 'credit_card'
   | 'bank_transfer'
   | 'pix'
-  | 'wallet';
+  | 'wallet'
+  | 'paypal'
+  | 'boleto';
 
 export type CurrencyCode = 'BRL' | 'EUR' | 'USD' | 'CAD' | 'AUD' | 'AED' | 'GBP';
 
@@ -19,6 +23,13 @@ export interface Currency {
   code: CurrencyCode;
   symbol: string;
   name: string;
+}
+
+export interface PaymentMethodType {
+  id: string;
+  name: string;
+  icon: string;
+  availableFor: CurrencyCode[];
 }
 
 export interface ServicePayment {

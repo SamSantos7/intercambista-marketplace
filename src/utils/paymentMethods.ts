@@ -1,8 +1,8 @@
 
-import { PaymentMethod, CurrencyCode } from "@/types/payment";
+import { PaymentMethodType, CurrencyCode } from "@/types/payment";
 import { CreditCard, Receipt, QrCode, Banknote } from "lucide-react";
 
-export const paymentMethods: PaymentMethod[] = [
+export const paymentMethods: PaymentMethodType[] = [
   {
     id: 'credit-card',
     name: 'Cartão de Crédito',
@@ -39,7 +39,7 @@ export const getPaymentMethodIcon = (methodId: string) => {
   }
 };
 
-export const getAvailablePaymentMethods = (currencyCode: CurrencyCode): PaymentMethod[] => {
+export const getAvailablePaymentMethods = (currencyCode: CurrencyCode): PaymentMethodType[] => {
   return paymentMethods.filter(method => 
     method.availableFor.includes(currencyCode)
   );
