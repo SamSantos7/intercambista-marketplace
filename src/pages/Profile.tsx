@@ -1,909 +1,992 @@
 
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Link } from 'react-router-dom';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { UserRole, AdvertiserProfile, ClientProfile, AdminProfile } from '@/types/user';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import {
   User,
-  Mail,
-  MapPin,
-  Edit2,
-  Shield,
   Star,
-  FileText,
+  MessageSquare,
+  Settings,
+  Edit,
+  Plus,
   Briefcase,
-  Award,
   CheckCircle,
-  BookOpen,
-  Heart,
-  Clock
+  MapPin,
+  Calendar,
+  Mail,
+  Phone,
+  Globe,
+  DollarSign,
+  RefreshCcw,
+  BarChart2,
+  ShoppingCart,
+  Users,
+  FileText
 } from 'lucide-react';
 
 const Profile = () => {
-  // Normalmente você buscaria esses dados de uma API
-  const [userRole, setUserRole] = useState<UserRole>('advertiser');
-  const [profile, setProfile] = useState<AdvertiserProfile | ClientProfile | AdminProfile>({
-    id: "user-1",
-    fullName: "Rafael Costa",
-    email: "rafael.costa@example.com",
-    location: "São Paulo, SP",
-    profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
-    description: "Especialista em marketing digital e comunicação. Ajudo intercambistas a estabelecer presença online e encontrar oportunidades no Brasil.",
-    role: "advertiser",
-    verified: true,
-    createdAt: new Date("2022-07-15"),
-    updatedAt: new Date("2023-06-22"),
-    skills: ["Marketing Digital", "SEO", "Copywriting", "Social Media"],
-    experience: "5+ anos em marketing digital, tendo trabalhado com empresas nacionais e internacionais.",
-    portfolio: "https://rafaelcosta.portfolio.com",
-    rating: 4.8,
-    totalReviews: 124,
-    identityVerified: true
+  const [activeTab, setActiveTab] = useState('overview');
+  const [isEditing, setIsEditing] = useState(false);
+  const { toast } = useToast();
+  const [profileData, setProfileData] = useState({
+    fullName: 'Ana Souza',
+    email: 'ana.souza@example.com',
+    phone: '+55 11 98765-4321',
+    location: 'Irlanda',
+    bio: 'Professora de português há 8 anos, especializada em ensinar estrangeiros. Formada em Letras pela USP com mestrado em Linguística Aplicada.',
+    website: 'www.anasouza.com',
+    profileImage: 'https://randomuser.me/api/portraits/women/43.jpg',
+    role: 'advertiser',
+    hourlyRate: 'R$ 80,00',
+    totalEarnings: 'R$ 12.560,00',
+    totalServices: 12,
+    totalClients: 24,
+    averageRating: 4.8,
+    totalReviews: 43,
+    joined: 'Fevereiro 2023'
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ ...profile });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
+  const handleSaveProfile = () => {
+    // Save profile logic here
+    setIsEditing(false);
+    toast({
+      title: "Perfil atualizado",
+      description: "Suas informações foram atualizadas com sucesso.",
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setProfile(formData as any);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setFormData({ ...profile });
-    setIsEditing(false);
-  };
-
-  const renderProfileContent = () => {
-    switch (userRole) {
-      case 'advertiser':
-        return renderAdvertiserProfile();
-      case 'client':
-        return renderClientProfile();
-      case 'admin':
-        return renderAdminProfile();
-      default:
-        return renderAdvertiserProfile();
-    }
-  };
-
-  const renderAdvertiserProfile = () => {
-    const advertiserProfile = profile as AdvertiserProfile;
-    
-    return (
-      <>
-        <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid grid-cols-4 mb-8">
-            <TabsTrigger value="info">Informações</TabsTrigger>
-            <TabsTrigger value="services">Serviços</TabsTrigger>
-            <TabsTrigger value="reviews">Avaliações</TabsTrigger>
-            <TabsTrigger value="stats">Estatísticas</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="info" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Informações Pessoais</CardTitle>
-                  <CardDescription>
-                    Seus dados pessoais e profissionais
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {isEditing ? (
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="fullName">Nome Completo</Label>
-                        <Input 
-                          id="fullName"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input 
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Localização</Label>
-                        <Input 
-                          id="location"
-                          name="location"
-                          value={formData.location}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="description">Descrição</Label>
-                        <Textarea 
-                          id="description"
-                          name="description"
-                          value={formData.description}
-                          onChange={handleChange}
-                          rows={4}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="portfolio">Portfolio URL</Label>
-                        <Input 
-                          id="portfolio"
-                          name="portfolio"
-                          value={(formData as AdvertiserProfile).portfolio}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="experience">Experiência</Label>
-                        <Textarea 
-                          id="experience"
-                          name="experience"
-                          value={(formData as AdvertiserProfile).experience}
-                          onChange={handleChange}
-                          rows={3}
-                        />
-                      </div>
-                      
-                      <div className="pt-4 flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={handleCancel}>
-                          Cancelar
-                        </Button>
-                        <Button type="submit">
-                          Salvar Alterações
-                        </Button>
-                      </div>
-                    </form>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <h3 className="text-lg font-medium">Dados Pessoais</h3>
-                        <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
-                          <Edit2 className="h-4 w-4 mr-2" /> Editar
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Nome</p>
-                            <p>{advertiserProfile.fullName}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Email</p>
-                            <p>{advertiserProfile.email}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Localização</p>
-                            <p>{advertiserProfile.location}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Membro desde</p>
-                            <p>{advertiserProfile.createdAt.toLocaleDateString('pt-BR')}</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Sobre</h3>
-                        <p className="text-muted-foreground">{advertiserProfile.description}</p>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Experiência</h3>
-                        <p className="text-muted-foreground">{advertiserProfile.experience}</p>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Habilidades</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {advertiserProfile.skills.map((skill, index) => (
-                            <Badge key={index} variant="secondary">{skill}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Portfolio</h3>
-                        <a 
-                          href={advertiserProfile.portfolio} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          {advertiserProfile.portfolio}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Verificações</CardTitle>
-                  <CardDescription>
-                    Status de verificação da sua conta
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-5 w-5 text-blue-500" />
-                      <span>Conta Verificada</span>
-                    </div>
-                    {advertiserProfile.verified ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <Button variant="outline" size="sm">Verificar</Button>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <User className="h-5 w-5 text-blue-500" />
-                      <span>Identidade Verificada</span>
-                    </div>
-                    {advertiserProfile.identityVerified ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <Button variant="outline" size="sm">Verificar</Button>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-5 w-5 text-blue-500" />
-                      <span>Email Verificado</span>
-                    </div>
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  </div>
-                  
-                  <div className="pt-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="h-5 w-5 text-yellow-500" />
-                      <span className="font-medium">Classificação</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold">{advertiserProfile.rating}</span>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i}
-                            className={`h-4 w-4 ${i < Math.floor(advertiserProfile.rating) ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'}`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-muted-foreground">({advertiserProfile.totalReviews} avaliações)</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="services" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Meus Serviços</CardTitle>
-                <CardDescription>
-                  Serviços que você oferece na plataforma
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Briefcase className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="mt-2 text-lg font-medium">Gerenciador de Serviços</h3>
-                  <p className="mt-1 text-muted-foreground">
-                    Gerencie seus serviços na seção específica do dashboard
-                  </p>
-                  <Button className="mt-4" asChild>
-                    <a href="/dashboard/services">Gerenciar Serviços</a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="reviews" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Avaliações</CardTitle>
-                <CardDescription>
-                  O que os clientes estão dizendo sobre seus serviços
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Star className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="mt-2 text-lg font-medium">Avaliações de Serviços</h3>
-                  <p className="mt-1 text-muted-foreground">
-                    Veja as avaliações detalhadas em cada serviço individual
-                  </p>
-                  <Button className="mt-4" asChild>
-                    <a href="/dashboard/services">Ver Serviços</a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="stats" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Estatísticas</CardTitle>
-                <CardDescription>
-                  Visualização detalhada do desempenho dos seus serviços
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <BarChart className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="mt-2 text-lg font-medium">Analytics Detalhados</h3>
-                  <p className="mt-1 text-muted-foreground">
-                    Veja estatísticas detalhadas na seção de analytics do dashboard
-                  </p>
-                  <Button className="mt-4" asChild>
-                    <a href="/analytics">Ver Analytics</a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </>
-    );
-  };
-
-  const renderClientProfile = () => {
-    const clientProfile = profile as ClientProfile;
-    
-    return (
-      <>
-        <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid grid-cols-3 mb-8">
-            <TabsTrigger value="info">Informações</TabsTrigger>
-            <TabsTrigger value="bookings">Contratações</TabsTrigger>
-            <TabsTrigger value="favorites">Favoritos</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="info" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Informações Pessoais</CardTitle>
-                  <CardDescription>
-                    Seus dados pessoais
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {isEditing ? (
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="fullName">Nome Completo</Label>
-                        <Input 
-                          id="fullName"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input 
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Localização</Label>
-                        <Input 
-                          id="location"
-                          name="location"
-                          value={formData.location}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="description">Descrição</Label>
-                        <Textarea 
-                          id="description"
-                          name="description"
-                          value={formData.description}
-                          onChange={handleChange}
-                          rows={4}
-                        />
-                      </div>
-                      
-                      <div className="pt-4 flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={handleCancel}>
-                          Cancelar
-                        </Button>
-                        <Button type="submit">
-                          Salvar Alterações
-                        </Button>
-                      </div>
-                    </form>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <h3 className="text-lg font-medium">Dados Pessoais</h3>
-                        <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
-                          <Edit2 className="h-4 w-4 mr-2" /> Editar
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Nome</p>
-                            <p>{clientProfile.fullName}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Email</p>
-                            <p>{clientProfile.email}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Localização</p>
-                            <p>{clientProfile.location}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Membro desde</p>
-                            <p>{clientProfile.createdAt.toLocaleDateString('pt-BR')}</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Sobre</h3>
-                        <p className="text-muted-foreground">{clientProfile.description}</p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Verificações</CardTitle>
-                  <CardDescription>
-                    Status de verificação da sua conta
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-5 w-5 text-blue-500" />
-                      <span>Conta Verificada</span>
-                    </div>
-                    {clientProfile.verified ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <Button variant="outline" size="sm">Verificar</Button>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-5 w-5 text-blue-500" />
-                      <span>Email Verificado</span>
-                    </div>
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  </div>
-                  
-                  <div className="pt-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <ShoppingCart className="h-5 w-5 text-blue-500" />
-                      <span className="font-medium">Histórico de Compras</span>
-                    </div>
-                    <p className="text-2xl font-bold">{clientProfile.purchaseHistory}</p>
-                    <p className="text-sm text-muted-foreground">serviços contratados</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="bookings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Meus Serviços Contratados</CardTitle>
-                <CardDescription>
-                  Serviços que você contratou na plataforma
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <BookOpen className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="mt-2 text-lg font-medium">Serviços Contratados</h3>
-                  <p className="mt-1 text-muted-foreground">
-                    Gerencie seus serviços contratados na seção específica
-                  </p>
-                  <Button className="mt-4" asChild>
-                    <a href="/client-services">Ver Serviços Contratados</a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="favorites" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Meus Favoritos</CardTitle>
-                <CardDescription>
-                  Serviços que você salvou como favoritos
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Heart className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="mt-2 text-lg font-medium">Serviços Favoritos</h3>
-                  <p className="mt-1 text-muted-foreground">
-                    Visualize e gerencie seus serviços favoritos
-                  </p>
-                  <Button className="mt-4" asChild>
-                    <a href="/favorites">Ver Favoritos</a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </>
-    );
-  };
-
-  const renderAdminProfile = () => {
-    const adminProfile = profile as AdminProfile;
-    
-    return (
-      <>
-        <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-8">
-            <TabsTrigger value="info">Informações</TabsTrigger>
-            <TabsTrigger value="permissions">Permissões</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="info" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Informações do Administrador</CardTitle>
-                  <CardDescription>
-                    Seus dados de administrador do sistema
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {isEditing ? (
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="fullName">Nome Completo</Label>
-                        <Input 
-                          id="fullName"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input 
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="pt-4 flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={handleCancel}>
-                          Cancelar
-                        </Button>
-                        <Button type="submit">
-                          Salvar Alterações
-                        </Button>
-                      </div>
-                    </form>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <h3 className="text-lg font-medium">Dados Pessoais</h3>
-                        <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
-                          <Edit2 className="h-4 w-4 mr-2" /> Editar
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Nome</p>
-                            <p>{adminProfile.fullName}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Email</p>
-                            <p>{adminProfile.email}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Função</p>
-                            <p>Administrador</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">Último Acesso</p>
-                            <p>{adminProfile.lastActive.toLocaleDateString('pt-BR')}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Ações Rápidas</CardTitle>
-                  <CardDescription>
-                    Atalhos para funções administrativas
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Users className="mr-2 h-4 w-4" />
-                    Gerenciar Usuários
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Briefcase className="mr-2 h-4 w-4" />
-                    Revisar Serviços
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Relatórios
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Shield className="mr-2 h-4 w-4" />
-                    Configurações de Segurança
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="permissions" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Permissões do Sistema</CardTitle>
-                <CardDescription>
-                  Suas permissões como administrador
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {(adminProfile.permissions || ['user_management', 'content_management', 'system_config', 'reports_access']).map((permission, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span>{permission.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </>
-    );
-  };
-
-  // Controles para alternar entre os diferentes tipos de perfil (apenas para demonstração)
-  const handleSwitchProfile = (role: UserRole) => {
-    setUserRole(role);
-    // Em uma aplicação real, você não teria esse botão. Apenas para demonstração.
-    
-    if (role === 'advertiser') {
-      setProfile({
-        id: "user-1",
-        fullName: "Rafael Costa",
-        email: "rafael.costa@example.com",
-        location: "São Paulo, SP",
-        profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
-        description: "Especialista em marketing digital e comunicação. Ajudo intercambistas a estabelecer presença online e encontrar oportunidades no Brasil.",
-        role: "advertiser",
-        verified: true,
-        createdAt: new Date("2022-07-15"),
-        updatedAt: new Date("2023-06-22"),
-        skills: ["Marketing Digital", "SEO", "Copywriting", "Social Media"],
-        experience: "5+ anos em marketing digital, tendo trabalhado com empresas nacionais e internacionais.",
-        portfolio: "https://rafaelcosta.portfolio.com",
-        rating: 4.8,
-        totalReviews: 124,
-        identityVerified: true
-      } as AdvertiserProfile);
-    } else if (role === 'client') {
-      setProfile({
-        id: "user-2",
-        fullName: "Ana Silva",
-        email: "ana.silva@example.com",
-        location: "Rio de Janeiro, RJ",
-        profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
-        description: "Intercambista em busca de serviços para facilitar minha adaptação no Brasil.",
-        role: "client",
-        verified: true,
-        createdAt: new Date("2023-01-10"),
-        updatedAt: new Date("2023-05-15"),
-        purchaseHistory: 8,
-        savedServices: ["service-1", "service-3", "service-7"]
-      } as ClientProfile);
-    } else if (role === 'admin') {
-      setProfile({
-        id: "user-3",
-        fullName: "Carlos Mendes",
-        email: "carlos.admin@example.com",
-        location: "Brasília, DF",
-        profileImage: "https://randomuser.me/api/portraits/men/67.jpg",
-        description: "Administrador da plataforma responsável pela gestão de usuários e conteúdos.",
-        role: "admin",
-        verified: true,
-        createdAt: new Date("2022-01-01"),
-        updatedAt: new Date("2023-04-20"),
-        permissions: ["user_management", "content_management", "system_config", "reports_access"],
-        lastActive: new Date()
-      } as AdminProfile);
-    }
+  const handleFieldChange = (field, value) => {
+    setProfileData({
+      ...profileData,
+      [field]: value
+    });
   };
 
   return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
-          <h1 className="text-3xl font-bold tracking-tight">Perfil</h1>
-          
-          {/* Apenas para demonstração - alternar entre tipos de perfil */}
-          <div className="flex gap-2">
-            <Button 
-              variant={userRole === 'advertiser' ? 'default' : 'outline'} 
-              size="sm" 
-              onClick={() => handleSwitchProfile('advertiser')}
-            >
-              Prestador
-            </Button>
-            <Button 
-              variant={userRole === 'client' ? 'default' : 'outline'} 
-              size="sm" 
-              onClick={() => handleSwitchProfile('client')}
-            >
-              Cliente
-            </Button>
-            <Button 
-              variant={userRole === 'admin' ? 'default' : 'outline'} 
-              size="sm" 
-              onClick={() => handleSwitchProfile('admin')}
-            >
-              Admin
-            </Button>
-          </div>
-        </div>
-        
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 bg-background rounded-lg p-6 border">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={profile.profileImage} alt={profile.fullName} />
-            <AvatarFallback>{profile.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          
-          <div className="space-y-1 flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <h2 className="text-2xl font-bold">{profile.fullName}</h2>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                  {profile.role === 'advertiser' ? 'Prestador de Serviços' : 
-                   profile.role === 'client' ? 'Cliente' : 'Administrador'}
-                </Badge>
-                {profile.verified && (
-                  <Badge variant="outline" className="bg-green-50 text-green-700">
-                    Verificado
-                  </Badge>
+    <div className="min-h-screen bg-muted/20">
+      {/* Header */}
+      <header className="bg-background border-b">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-20 w-20 border-4 border-background">
+                <AvatarImage src={profileData.profileImage} alt={profileData.fullName} />
+                <AvatarFallback>{profileData.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-3xl font-bold">{profileData.fullName}</h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <MapPin className="h-4 w-4" />
+                    {profileData.location}
+                  </span>
+                  <span className="text-muted-foreground">•</span>
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    Membro desde {profileData.joined}
+                  </span>
+                </div>
+                
+                {profileData.role === 'advertiser' && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                      <span className="ml-1 font-medium">{profileData.averageRating}</span>
+                      <span className="text-muted-foreground ml-1">({profileData.totalReviews} avaliações)</span>
+                    </div>
+                    <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">Prestador de Serviços</Badge>
+                  </div>
+                )}
+                
+                {profileData.role === 'client' && (
+                  <Badge className="bg-green-100 text-green-800 hover:bg-green-200 mt-2">Cliente</Badge>
+                )}
+                
+                {profileData.role === 'admin' && (
+                  <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200 mt-2">Administrador</Badge>
                 )}
               </div>
             </div>
-            <p className="text-muted-foreground">{profile.description}</p>
-            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>{profile.location}</span>
+            
+            <div className="flex gap-2">
+              {profileData.role === 'advertiser' && (
+                <Button variant="outline" asChild>
+                  <Link to="/dashboard/services/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Serviço
+                  </Link>
+                </Button>
+              )}
+              
+              <Button onClick={() => setIsEditing(true)} className="gap-2">
+                <Edit className="h-4 w-4" />
+                Editar Perfil
+              </Button>
             </div>
           </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Sidebar */}
+          <div className="md:col-span-1 space-y-6">
+            {/* Contact Info Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações de Contato</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="font-medium">{profileData.email}</p>
+                    <p className="text-sm text-muted-foreground">E-mail</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="font-medium">{profileData.phone}</p>
+                    <p className="text-sm text-muted-foreground">Telefone</p>
+                  </div>
+                </div>
+                
+                {profileData.website && (
+                  <div className="flex items-start gap-3">
+                    <Globe className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="font-medium">{profileData.website}</p>
+                      <p className="text-sm text-muted-foreground">Website</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            
+            {/* Services Stats (for advertisers) */}
+            {profileData.role === 'advertiser' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Estatísticas</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Taxa horária</span>
+                    <span className="font-medium">{profileData.hourlyRate}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Total ganho</span>
+                    <span className="font-medium">{profileData.totalEarnings}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Serviços ativos</span>
+                    <span className="font-medium">{profileData.totalServices}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Clientes atendidos</span>
+                    <span className="font-medium">{profileData.totalClients}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Avaliação média</span>
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                      <span className="ml-1 font-medium">{profileData.averageRating}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Client Stats */}
+            {profileData.role === 'client' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Estatísticas</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Serviços contratados</span>
+                    <span className="font-medium">8</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Avaliações feitas</span>
+                    <span className="font-medium">7</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Serviços favoritos</span>
+                    <span className="font-medium">12</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Membro desde</span>
+                    <span className="font-medium">{profileData.joined}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Admin Stats */}
+            {profileData.role === 'admin' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Estatísticas do Admin</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Serviços aprovados</span>
+                    <span className="font-medium">145</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Usuários moderados</span>
+                    <span className="font-medium">32</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Pagamentos processados</span>
+                    <span className="font-medium">287</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Nível de acesso</span>
+                    <Badge>Administrador Master</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
           
-          <div className="flex gap-2 mt-4 md:mt-0">
-            <Button>Editar Perfil</Button>
-            <Button variant="outline">Configurações</Button>
+          {/* Main Content */}
+          <div className="md:col-span-2">
+            {isEditing ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Editar Perfil</CardTitle>
+                  <CardDescription>
+                    Atualize suas informações de perfil
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Nome Completo</Label>
+                    <Input 
+                      id="fullName" 
+                      value={profileData.fullName} 
+                      onChange={(e) => handleFieldChange('fullName', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">E-mail</Label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        value={profileData.email} 
+                        onChange={(e) => handleFieldChange('email', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefone</Label>
+                      <Input 
+                        id="phone" 
+                        value={profileData.phone} 
+                        onChange={(e) => handleFieldChange('phone', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Localização</Label>
+                    <Input 
+                      id="location" 
+                      value={profileData.location} 
+                      onChange={(e) => handleFieldChange('location', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">Biografia</Label>
+                    <Textarea 
+                      id="bio" 
+                      rows={4} 
+                      value={profileData.bio} 
+                      onChange={(e) => handleFieldChange('bio', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Website</Label>
+                    <Input 
+                      id="website" 
+                      value={profileData.website} 
+                      onChange={(e) => handleFieldChange('website', e.target.value)}
+                    />
+                  </div>
+                  
+                  {profileData.role === 'advertiser' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="hourlyRate">Taxa Horária (R$)</Label>
+                      <Input 
+                        id="hourlyRate" 
+                        value={profileData.hourlyRate.replace('R$ ', '')} 
+                        onChange={(e) => handleFieldChange('hourlyRate', `R$ ${e.target.value}`)}
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch id="public-profile" defaultChecked />
+                    <Label htmlFor="public-profile">Perfil público</Label>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setIsEditing(false)}>Cancelar</Button>
+                  <Button onClick={handleSaveProfile}>Salvar Alterações</Button>
+                </CardFooter>
+              </Card>
+            ) : (
+              <Tabs defaultValue="overview" className="space-y-6" onValueChange={setActiveTab}>
+                <TabsList>
+                  <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+                  
+                  {profileData.role === 'advertiser' && (
+                    <TabsTrigger value="services">Serviços</TabsTrigger>
+                  )}
+                  
+                  {profileData.role === 'client' && (
+                    <TabsTrigger value="hired">Serviços Contratados</TabsTrigger>
+                  )}
+                  
+                  <TabsTrigger value="reviews">
+                    {profileData.role === 'advertiser' ? 'Avaliações' : 'Avaliações Feitas'}
+                  </TabsTrigger>
+                  
+                  {profileData.role === 'admin' && (
+                    <TabsTrigger value="activities">Atividades</TabsTrigger>
+                  )}
+                </TabsList>
+                
+                {/* Overview Tab */}
+                <TabsContent value="overview" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Sobre</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="whitespace-pre-line">{profileData.bio}</p>
+                    </CardContent>
+                  </Card>
+                  
+                  {profileData.role === 'advertiser' && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Estatísticas Recentes</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                          <div className="flex flex-col p-4 border rounded-lg">
+                            <span className="text-sm text-muted-foreground">Serviços Ativos</span>
+                            <div className="flex items-center mt-2">
+                              <Briefcase className="h-5 w-5 text-blue-500 mr-2" />
+                              <span className="text-2xl font-bold">{profileData.totalServices}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col p-4 border rounded-lg">
+                            <span className="text-sm text-muted-foreground">Avaliação</span>
+                            <div className="flex items-center mt-2">
+                              <Star className="h-5 w-5 text-amber-500 fill-amber-500 mr-2" />
+                              <span className="text-2xl font-bold">{profileData.averageRating}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col p-4 border rounded-lg">
+                            <span className="text-sm text-muted-foreground">Clientes</span>
+                            <div className="flex items-center mt-2">
+                              <BarChart2 className="h-5 w-5 text-green-500 mr-2" />
+                              <span className="text-2xl font-bold">{profileData.totalClients}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-6">
+                          <h3 className="font-medium mb-4">Clientes Recentes</h3>
+                          <div className="space-y-3">
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <Avatar className="h-8 w-8 mr-2">
+                                    <AvatarImage src={`https://randomuser.me/api/portraits/${i % 2 ? 'men' : 'women'}/${i + 20}.jpg`} />
+                                    <AvatarFallback>CL</AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <p className="text-sm font-medium">Cliente {i}</p>
+                                    <p className="text-xs text-muted-foreground">Aula de português</p>
+                                  </div>
+                                </div>
+                                <Badge variant="outline" className="bg-green-50">
+                                  <CheckCircle className="h-3 w-3 mr-1" /> Concluído
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  {profileData.role === 'client' && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Atividade Recente</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                          <div className="flex flex-col p-4 border rounded-lg">
+                            <span className="text-sm text-muted-foreground">Serviços Contratados</span>
+                            <div className="flex items-center mt-2">
+                              <ShoppingCart className="h-5 w-5 text-blue-500 mr-2" />
+                              <span className="text-2xl font-bold">8</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col p-4 border rounded-lg">
+                            <span className="text-sm text-muted-foreground">Avaliações</span>
+                            <div className="flex items-center mt-2">
+                              <Star className="h-5 w-5 text-amber-500 fill-amber-500 mr-2" />
+                              <span className="text-2xl font-bold">7</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col p-4 border rounded-lg">
+                            <span className="text-sm text-muted-foreground">Pagamentos</span>
+                            <div className="flex items-center mt-2">
+                              <DollarSign className="h-5 w-5 text-green-500 mr-2" />
+                              <span className="text-2xl font-bold">12</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-6">
+                          <h3 className="font-medium mb-4">Serviços Recentes</h3>
+                          <div className="space-y-3">
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <Avatar className="h-8 w-8 mr-2">
+                                    <AvatarImage src={`https://randomuser.me/api/portraits/${i % 2 ? 'women' : 'men'}/${i + 30}.jpg`} />
+                                    <AvatarFallback>PR</AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <p className="text-sm font-medium">Serviço {i}</p>
+                                    <p className="text-xs text-muted-foreground">Prestador {i}</p>
+                                  </div>
+                                </div>
+                                <Badge variant="outline" className="bg-green-50">
+                                  <CheckCircle className="h-3 w-3 mr-1" /> Concluído
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  {profileData.role === 'admin' && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Visão Geral do Sistema</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                          <div className="flex flex-col p-4 border rounded-lg">
+                            <span className="text-sm text-muted-foreground">Usuários Totais</span>
+                            <div className="flex items-center mt-2">
+                              <Users className="h-5 w-5 text-blue-500 mr-2" />
+                              <span className="text-2xl font-bold">523</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col p-4 border rounded-lg">
+                            <span className="text-sm text-muted-foreground">Serviços Ativos</span>
+                            <div className="flex items-center mt-2">
+                              <Briefcase className="h-5 w-5 text-green-500 mr-2" />
+                              <span className="text-2xl font-bold">187</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col p-4 border rounded-lg">
+                            <span className="text-sm text-muted-foreground">Transações</span>
+                            <div className="flex items-center mt-2">
+                              <RefreshCcw className="h-5 w-5 text-amber-500 mr-2" />
+                              <span className="text-2xl font-bold">845</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-6">
+                          <h3 className="font-medium mb-4">Atividades Recentes</h3>
+                          <div className="space-y-3">
+                            {[
+                              {
+                                action: "Aprovação de serviço",
+                                details: "Aula de português",
+                                time: "2 horas atrás"
+                              },
+                              {
+                                action: "Moderação de usuário",
+                                details: "Carlos Mendes",
+                                time: "5 horas atrás"
+                              },
+                              {
+                                action: "Processamento de reembolso",
+                                details: "Pedido #45982",
+                                time: "1 dia atrás"
+                              }
+                            ].map((activity, i) => (
+                              <div key={i} className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-sm font-medium">{activity.action}</p>
+                                  <p className="text-xs text-muted-foreground">{activity.details}</p>
+                                </div>
+                                <span className="text-xs text-muted-foreground">{activity.time}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+                
+                {/* Services Tab for advertisers */}
+                {profileData.role === 'advertiser' && (
+                  <TabsContent value="services" className="space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-xl font-semibold">Meus Serviços</h3>
+                      <Button asChild>
+                        <Link to="/dashboard/services/new" className="flex items-center">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Novo Serviço
+                        </Link>
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        {
+                          id: "srv-001",
+                          title: "Aulas de Português para Estrangeiros",
+                          category: "Educação",
+                          price: "R$ 80,00/hora",
+                          bookings: 8,
+                          rating: 4.9,
+                          status: "active",
+                          image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                        },
+                        {
+                          id: "srv-002",
+                          title: "Tradução de Documentos (PT/EN)",
+                          category: "Tradução",
+                          price: "R$ 120,00/página",
+                          bookings: 12,
+                          rating: 4.8,
+                          status: "active",
+                          image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                        },
+                        {
+                          id: "srv-003",
+                          title: "Orientação para Intercambistas",
+                          category: "Consultoria",
+                          price: "R$ 150,00/sessão",
+                          bookings: 5,
+                          rating: 5.0,
+                          status: "inactive",
+                          image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                        }
+                      ].map((service) => (
+                        <Card key={service.id} className="overflow-hidden">
+                          <div className="aspect-video relative">
+                            <img 
+                              src={service.image} 
+                              alt={service.title} 
+                              className="object-cover w-full h-full"
+                            />
+                            <div className="absolute top-3 right-3">
+                              <Badge className={service.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                                {service.status === 'active' ? 'Ativo' : 'Inativo'}
+                              </Badge>
+                            </div>
+                          </div>
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h4 className="font-semibold line-clamp-2">{service.title}</h4>
+                                <p className="text-sm text-muted-foreground">{service.category}</p>
+                              </div>
+                              <p className="font-bold">{service.price}</p>
+                            </div>
+                            
+                            <div className="flex items-center justify-between mt-4">
+                              <div className="flex items-center">
+                                <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                                <span className="ml-1 text-sm">{service.rating}</span>
+                              </div>
+                              <span className="text-sm text-muted-foreground">{service.bookings} agendamentos</span>
+                            </div>
+                          </CardContent>
+                          <CardFooter className="p-4 pt-0 flex gap-2">
+                            <Button variant="outline" size="sm" asChild className="flex-1">
+                              <Link to={`/dashboard/services/${service.id}`}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver
+                              </Link>
+                            </Button>
+                            <Button size="sm" asChild className="flex-1">
+                              <Link to={`/dashboard/services/${service.id}/edit`}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar
+                              </Link>
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                    </div>
+                  </TabsContent>
+                )}
+                
+                {/* Hired Services Tab for clients */}
+                {profileData.role === 'client' && (
+                  <TabsContent value="hired" className="space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-xl font-semibold">Serviços Contratados</h3>
+                      <Button variant="outline" asChild>
+                        <Link to="/services">
+                          Explorar Serviços
+                        </Link>
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      {[
+                        {
+                          id: "book-001",
+                          title: "Aulas de Português para Estrangeiros",
+                          provider: "Ana Souza",
+                          date: "15/06/2023",
+                          status: "completed",
+                          amount: "R$ 320,00",
+                          image: "https://randomuser.me/api/portraits/women/43.jpg"
+                        },
+                        {
+                          id: "book-002",
+                          title: "Orientação para Intercambistas",
+                          provider: "Paulo Mendes",
+                          date: "28/07/2023",
+                          status: "completed",
+                          amount: "R$ 150,00",
+                          image: "https://randomuser.me/api/portraits/men/22.jpg"
+                        },
+                        {
+                          id: "book-003",
+                          title: "Tradução de Documentos",
+                          provider: "Carla Santos",
+                          date: "03/08/2023",
+                          status: "active",
+                          amount: "R$ 240,00",
+                          image: "https://randomuser.me/api/portraits/women/28.jpg"
+                        }
+                      ].map((booking) => (
+                        <Card key={booking.id}>
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              <Avatar className="h-12 w-12">
+                                <AvatarImage src={booking.image} alt={booking.provider} />
+                                <AvatarFallback>{booking.provider.substring(0, 2).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                              
+                              <div className="flex-1">
+                                <h4 className="font-semibold">{booking.title}</h4>
+                                <p className="text-sm text-muted-foreground">Prestador: {booking.provider}</p>
+                              </div>
+                              
+                              <div className="text-right">
+                                <p className="font-bold">{booking.amount}</p>
+                                <p className="text-sm text-muted-foreground">{booking.date}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between mt-4">
+                              <Badge
+                                className={
+                                  booking.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                  booking.status === 'active' ? 'bg-blue-100 text-blue-800' : 
+                                  'bg-amber-100 text-amber-800'
+                                }
+                              >
+                                {booking.status === 'completed' ? 'Concluído' : 
+                                  booking.status === 'active' ? 'Em Andamento' : 'Agendado'}
+                              </Badge>
+                              
+                              <div className="space-x-2">
+                                <Button variant="outline" size="sm" asChild>
+                                  <Link to={`/services/${booking.id}`}>Detalhes</Link>
+                                </Button>
+                                {booking.status === 'completed' && !booking.id.includes('002') && (
+                                  <Button size="sm" variant="outline">Avaliar</Button>
+                                )}
+                                {booking.status === 'completed' && booking.id.includes('002') && (
+                                  <Button size="sm" variant="outline" disabled>Avaliado</Button>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </TabsContent>
+                )}
+                
+                {/* Reviews Tab */}
+                <TabsContent value="reviews" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        {profileData.role === 'advertiser' ? 'Avaliações de Clientes' : 'Avaliações Feitas'}
+                      </CardTitle>
+                      {profileData.role === 'advertiser' && (
+                        <CardDescription>
+                          {profileData.totalReviews} avaliações, média de {profileData.averageRating} estrelas
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {profileData.role === 'advertiser' ? (
+                        // Reviews for advertiser
+                        [
+                          {
+                            id: 1,
+                            client: "João Silva",
+                            avatar: "https://randomuser.me/api/portraits/men/22.jpg",
+                            rating: 5,
+                            date: "10/06/2023",
+                            comment: "Excelentes aulas de português! A Ana é paciente e explica de maneira clara, adaptando o conteúdo às minhas necessidades. Recomendo!"
+                          },
+                          {
+                            id: 2,
+                            client: "Maria Costa",
+                            avatar: "https://randomuser.me/api/portraits/women/56.jpg",
+                            rating: 5,
+                            date: "28/05/2023",
+                            comment: "Ótimo serviço! Aulas personalizadas e materiais muito úteis. Já estou notando um grande progresso no meu português."
+                          },
+                          {
+                            id: 3,
+                            client: "Richard Thompson",
+                            avatar: "https://randomuser.me/api/portraits/men/41.jpg",
+                            rating: 4,
+                            date: "15/05/2023",
+                            comment: "Professora muito competente e pontual. As aulas são bem estruturadas e práticas. Recomendo para quem quer aprender português rapidamente."
+                          }
+                        ].map((review) => (
+                          <div key={review.id} className="pb-5 border-b last:border-0 last:pb-0">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center">
+                                <Avatar className="h-10 w-10 mr-3">
+                                  <AvatarImage src={review.avatar} alt={review.client} />
+                                  <AvatarFallback>{review.client.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{review.client}</p>
+                                  <p className="text-xs text-muted-foreground">{review.date}</p>
+                                </div>
+                              </div>
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i}
+                                    className={`h-4 w-4 ${i < review.rating ? 'text-amber-500 fill-amber-500' : 'text-gray-200'}`} 
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <p className="mt-3 text-sm">{review.comment}</p>
+                          </div>
+                        ))
+                      ) : (
+                        // Reviews made by client
+                        [
+                          {
+                            id: 1,
+                            provider: "Paulo Mendes",
+                            service: "Orientação para Intercambistas",
+                            avatar: "https://randomuser.me/api/portraits/men/22.jpg",
+                            rating: 5,
+                            date: "28/07/2023",
+                            comment: "Orientação excelente! Paulo conhece muito bem a Irlanda e me ajudou com dicas valiosas sobre moradia, trabalho e documentação."
+                          },
+                          {
+                            id: 2,
+                            provider: "Ana Souza",
+                            service: "Aulas de Português para Estrangeiros",
+                            avatar: "https://randomuser.me/api/portraits/women/43.jpg",
+                            rating: 4,
+                            date: "15/06/2023",
+                            comment: "Ótimas aulas, professora muito paciente e dedicada. Materiais bem elaborados e adaptados às minhas necessidades."
+                          }
+                        ].map((review) => (
+                          <div key={review.id} className="pb-5 border-b last:border-0 last:pb-0">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center">
+                                <Avatar className="h-10 w-10 mr-3">
+                                  <AvatarImage src={review.avatar} alt={review.provider} />
+                                  <AvatarFallback>{review.provider.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{review.provider}</p>
+                                  <p className="text-xs">{review.service}</p>
+                                  <p className="text-xs text-muted-foreground">{review.date}</p>
+                                </div>
+                              </div>
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i}
+                                    className={`h-4 w-4 ${i < review.rating ? 'text-amber-500 fill-amber-500' : 'text-gray-200'}`} 
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <p className="mt-3 text-sm">{review.comment}</p>
+                          </div>
+                        ))
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                
+                {/* Admin Activities Tab */}
+                {profileData.role === 'admin' && (
+                  <TabsContent value="activities" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Atividades do Administrador</CardTitle>
+                        <CardDescription>
+                          Registro de ações administrativas recentes
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {[
+                            {
+                              action: "Aprovação de serviço",
+                              details: "Tradução de Documentos - Carlos Mendes",
+                              time: "Hoje, 14:30",
+                              icon: <CheckCircle className="h-4 w-4 text-green-500" />
+                            },
+                            {
+                              action: "Moderação de usuário",
+                              details: "Advertência - Roberto Alves",
+                              time: "Ontem, 16:45",
+                              icon: <User className="h-4 w-4 text-amber-500" />
+                            },
+                            {
+                              action: "Moderação de conteúdo",
+                              details: "Remoção de comentário inadequado",
+                              time: "25/05/2023, 10:20",
+                              icon: <FileText className="h-4 w-4 text-red-500" />
+                            },
+                            {
+                              action: "Processamento de reembolso",
+                              details: "Pedido #45982 - R$ 150,00",
+                              time: "22/05/2023, 09:15",
+                              icon: <RefreshCcw className="h-4 w-4 text-blue-500" />
+                            },
+                            {
+                              action: "Configuração do sistema",
+                              details: "Atualização das taxas de serviço",
+                              time: "20/05/2023, 11:30",
+                              icon: <Settings className="h-4 w-4 text-gray-500" />
+                            }
+                          ].map((activity, i) => (
+                            <div key={i} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
+                              <div className="bg-muted rounded-full p-2 mt-1">
+                                {activity.icon}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex justify-between">
+                                  <p className="font-medium">{activity.action}</p>
+                                  <span className="text-xs text-muted-foreground">{activity.time}</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">{activity.details}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Permissões de Acesso</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { name: "Gerenciar usuários", enabled: true },
+                            { name: "Aprovar/rejeitar serviços", enabled: true },
+                            { name: "Processar reembolsos", enabled: true },
+                            { name: "Modificar configurações do sistema", enabled: true },
+                            { name: "Acessar relatórios financeiros", enabled: true },
+                            { name: "Adicionar administradores", enabled: false }
+                          ].map((permission, i) => (
+                            <div key={i} className="flex items-center justify-between">
+                              <span>{permission.name}</span>
+                              <div className="flex items-center gap-2">
+                                <Badge className={permission.enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                                  {permission.enabled ? 'Permitido' : 'Bloqueado'}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                )}
+              </Tabs>
+            )}
           </div>
         </div>
-        
-        {renderProfileContent()}
-      </div>
-    </DashboardLayout>
+      </main>
+    </div>
   );
 };
 
