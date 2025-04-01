@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,14 +10,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Star from "@/components/icons/Star";
 import PaymentFlow from "@/components/PaymentFlow";
 import PaymentStatus from "@/components/PaymentStatus";
+import NegotiationFlow from "@/components/NegotiationFlow";
 import { usePaymentState } from "@/hooks/use-payment-state";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 const ServiceDetail = () => {
   const { id } = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [showPaymentFlow, setShowPaymentFlow] = useState(false);
+  const [showNegotiation, setShowNegotiation] = useState(false);
   const [paymentId, setPaymentId] = useState<string | null>(null);
+  const [serviceData, setServiceData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
   const { paymentStatus, updatePaymentStatus } = usePaymentState({
     initialStatus: 'pending',
     onStatusChange: (status) => {
@@ -25,8 +33,48 @@ const ServiceDetail = () => {
     }
   });
   
-  // Mock data for this example
-  const service = {
+  useEffect(() => {
+    const fetchServiceData = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('services')
+          .select(`
+            *,
+            provider:provider_id(
+              id,
+              full_name,
+              profile_image,
+              country
+            )
+          `)
+          .eq('id', id)
+          .single();
+          
+        if (error) throw error;
+        
+        if (data) {
+          setServiceData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching service data:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar os dados do serviço.',
+          variant: 'destructive'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchServiceData();
+  }, [id]);
+  
+  // Use the fetched data if available, otherwise use mock data
+  const service = serviceData || {
     id: id,
     title: "Assistência com Documentação",
     category: "Documentação",
@@ -91,12 +139,25 @@ const ServiceDetail = () => {
 
   const handleHireService = () => {
     setShowPaymentFlow(true);
+    setShowNegotiation(false);
+  };
+  
+  const handleNegotiateService = () => {
+    setShowNegotiation(true);
+    setShowPaymentFlow(false);
   };
 
   const handleContact = () => {
     toast({
       title: "Mensagem enviada",
       description: "O prestador de serviços receberá sua mensagem e entrará em contato em breve.",
+    });
+  };
+
+  const handleNegotiationComplete = () => {
+    toast({
+      title: "Negociação iniciada",
+      description: "Sua oferta foi enviada ao anunciante. Acompanhe a negociação.",
     });
   };
 
@@ -159,11 +220,20 @@ const ServiceDetail = () => {
                   serviceTitle={service.title}
                   servicePrice={service.price}
                   serviceProvider={{
-                    id: '1',
-                    name: service.provider.name
+                    id: serviceData?.provider_id || '1',
+                    name: serviceData?.provider?.full_name || service.provider.name
                   }}
-                  userLocation={service.provider.location}
+                  userLocation={serviceData?.provider?.country || service.provider.location}
                   onComplete={handlePaymentComplete}
+                />
+              ) : showNegotiation ? (
+                <NegotiationFlow
+                  serviceId={service.id || ''}
+                  serviceTitle={service.title}
+                  servicePrice={service.price}
+                  providerId={serviceData?.provider_id || '1'}
+                  providerName={serviceData?.provider?.full_name || service.provider.name}
+                  onComplete={handleNegotiationComplete}
                 />
               ) : paymentId ? (
                 <PaymentStatus 
@@ -217,6 +287,7 @@ const ServiceDetail = () => {
                         </div>
                       </TabsContent>
                       
+                      {/* Filtered tabs content */}
                       <TabsContent value="5">
                         <div className="space-y-6">
                           {service.reviews
@@ -248,7 +319,6 @@ const ServiceDetail = () => {
                         </div>
                       </TabsContent>
                       
-                      {/* Conteúdos similares para as outras abas */}
                       <TabsContent value="4">
                         <div className="space-y-6">
                           {service.reviews
@@ -323,15 +393,23 @@ const ServiceDetail = () => {
                   <h2 className="text-2xl font-bold mb-2">R$ {service.price.toFixed(2)}</h2>
                   <p className="text-gray-600 mb-6">Preço pode variar conforme necessidades específicas</p>
 
-                  {!paymentId && (
+                  {!paymentId && !showNegotiation && !showPaymentFlow && (
                     <>
                       <Button 
                         className="w-full mb-4" 
                         onClick={handleHireService}
-                        disabled={showPaymentFlow}
                       >
                         Contratar Serviço
                       </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full mb-4"
+                        onClick={handleNegotiateService}
+                      >
+                        Negociar Preço
+                      </Button>
+                      
                       <Button 
                         variant="outline" 
                         className="w-full mb-6"
@@ -345,10 +423,18 @@ const ServiceDetail = () => {
                   <div className="mb-6">
                     <h3 className="font-semibold mb-2">Prestador de Serviço</h3>
                     <div className="flex items-center">
-                      <div className="w-12 h-12 rounded-full bg-gray-200 mr-3"></div>
+                      <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 overflow-hidden">
+                        {serviceData?.provider?.profile_image && (
+                          <img 
+                            src={serviceData.provider.profile_image} 
+                            alt={serviceData.provider.full_name} 
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
                       <div>
-                        <p className="font-medium">{service.provider.name}</p>
-                        <p className="text-sm text-gray-600">{service.provider.location}</p>
+                        <p className="font-medium">{serviceData?.provider?.full_name || service.provider.name}</p>
+                        <p className="text-sm text-gray-600">{serviceData?.provider?.country || service.provider.location}</p>
                       </div>
                     </div>
                   </div>
