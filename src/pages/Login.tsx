@@ -112,6 +112,31 @@ const Login = () => {
       });
       
       // Auth context and useEffect will handle the redirect based on user type
+      
+      // Additionally, fetch user type immediately to ensure proper redirection
+      const { data, error: userError } = await supabase
+        .from('users')
+        .select('user_type')
+        .eq('email', values.email)
+        .single();
+      
+      if (!userError && data) {
+        switch (data.user_type) {
+          case 'admin':
+            navigate('/admin');
+            break;
+          case 'provider': // Anunciante
+            navigate('/dashboard');
+            break;
+          case 'client': // Cliente
+            navigate('/dashboard-alt');
+            break;
+          default:
+            navigate('/dashboard');
+            break;
+        }
+      }
+      
     } catch (error) {
       console.error("Erro no login:", error);
       setAuthError("Ocorreu um erro ao tentar fazer login. Tente novamente.");

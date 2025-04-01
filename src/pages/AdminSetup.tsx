@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { setupAdminUser } from '@/utils/setupAdmin';
 import { CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminSetup = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,9 +16,33 @@ const AdminSetup = () => {
     message?: string;
     error?: any;
   } | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     document.title = 'Configuração de Administrador | Intercambista';
+    
+    // Check if there's already an admin user
+    const checkAdminUser = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id')
+          .eq('user_type', 'admin')
+          .limit(1);
+          
+        if (!error && data && data.length > 0) {
+          setSetupResult({
+            success: true,
+            message: "Um usuário administrador já está configurado."
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao verificar usuário admin:", err);
+      }
+    };
+    
+    checkAdminUser();
   }, []);
 
   const handleSetupAdmin = async () => {

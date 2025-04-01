@@ -1,6 +1,8 @@
 
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedRouteProps {
   children: JSX.Element;
@@ -16,9 +18,42 @@ const ProtectedRoute = ({
   providerOnly = false 
 }: ProtectedRouteProps) => {
   const { user, isLoading } = useAuth();
+  const [userType, setUserType] = useState<string | null>(null);
+  const [isCheckingUserType, setIsCheckingUserType] = useState(true);
+  
+  useEffect(() => {
+    const checkUserType = async () => {
+      if (!user) {
+        setIsCheckingUserType(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('user_type')
+          .eq('id', user.id)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching user type:', error);
+          setUserType(null);
+        } else {
+          setUserType(data?.user_type || null);
+        }
+      } catch (err) {
+        console.error('Error in user type check:', err);
+        setUserType(null);
+      } finally {
+        setIsCheckingUserType(false);
+      }
+    };
+    
+    checkUserType();
+  }, [user]);
   
   // Mostrar um loading enquanto verifica a autenticação
-  if (isLoading) {
+  if (isLoading || isCheckingUserType) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -32,7 +67,6 @@ const ProtectedRoute = ({
   }
   
   // Verificar as regras de permissão
-  const userType = user.user_metadata?.user_type || 'client';
   
   // Verificar se a rota é apenas para administradores
   if (adminOnly && userType !== 'admin') {
