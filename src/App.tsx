@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminLogin from "./pages/AdminLogin";
+import AdminSetup from "./pages/AdminSetup";
 import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import DashboardAlt from "./pages/DashboardAlt";
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/setup" element={<AdminSetup />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/services" element={<Services />} />
@@ -63,8 +65,8 @@ const App = () => (
             <Route path="/cookies" element={<Cookies />} />
             
             {/* Páginas protegidas */}
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/dashboard-alt" element={<ProtectedRoute><DashboardAlt /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute providerOnly={true}><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard-alt" element={<ProtectedRoute clientOnly={true}><DashboardAlt /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/user-services" element={<ProtectedRoute><UserServices /></ProtectedRoute>} />
             <Route path="/client-services" element={<ProtectedRoute><ClientServices /></ProtectedRoute>} />

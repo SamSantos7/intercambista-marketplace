@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, User, Search } from 'lucide-react';
+import { Menu, X, User, Search, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -33,6 +33,10 @@ const Navbar = () => {
     // No need to navigate - AuthContext will handle redirection
   };
 
+  const isAdmin = user?.user_metadata?.user_type === 'admin';
+  const isClient = user?.user_metadata?.user_type === 'client';
+  const isProvider = user?.user_metadata?.user_type === 'provider';
+
   return (
     <header 
       className={cn(
@@ -58,8 +62,16 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-4 animate-fade-in">
           {user ? (
             <>
+              {isAdmin && (
+                <Button variant="ghost" size="sm" asChild className="flex items-center gap-1">
+                  <Link to="/admin">
+                    <Shield size={16} className="text-red-500" />
+                    Admin
+                  </Link>
+                </Button>
+              )}
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/dashboard">Dashboard</Link>
+                <Link to={isClient ? "/dashboard-alt" : "/dashboard"}>Dashboard</Link>
               </Button>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 Sair
@@ -72,6 +84,12 @@ const Navbar = () => {
               </Button>
               <Button size="sm" asChild>
                 <Link to="/register">Cadastrar</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="flex items-center gap-1">
+                <Link to="/admin/setup">
+                  <Shield size={16} className="text-red-500" />
+                  Admin
+                </Link>
               </Button>
             </>
           )}
@@ -102,8 +120,15 @@ const Navbar = () => {
             <div className="flex flex-col gap-2 pt-4 border-t">
               {user ? (
                 <>
+                  {isAdmin && (
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/admin" className="flex items-center gap-2">
+                        <Shield size={16} className="text-red-500" /> Área de Admin
+                      </Link>
+                    </Button>
+                  )}
                   <Button variant="ghost" size="sm" asChild>
-                    <Link to="/dashboard" className="flex items-center gap-2">
+                    <Link to={isClient ? "/dashboard-alt" : "/dashboard"} className="flex items-center gap-2">
                       <User size={16} /> Dashboard
                     </Link>
                   </Button>
@@ -120,6 +145,11 @@ const Navbar = () => {
                   </Button>
                   <Button size="sm" asChild>
                     <Link to="/register">Cadastrar</Link>
+                  </Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/admin/setup" className="flex items-center gap-2">
+                      <Shield size={16} className="text-red-500" /> Configurar Admin
+                    </Link>
                   </Button>
                 </>
               )}

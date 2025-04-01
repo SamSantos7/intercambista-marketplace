@@ -28,6 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 // Validação do formulário
 const loginSchema = z.object({
@@ -44,20 +45,39 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      rememberMe: false,
-    },
-  });
-
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
+    const checkUser = async () => {
+      if (user) {
+        // Get user type to redirect correctly
+        const { data, error } = await supabase
+          .from('users')
+          .select('user_type')
+          .eq('id', user.id)
+          .single();
+        
+        if (!error && data) {
+          switch (data.user_type) {
+            case 'admin':
+              navigate('/admin');
+              break;
+            case 'provider': // Anunciante
+              navigate('/dashboard');
+              break;
+            case 'client': // Cliente
+              navigate('/dashboard-alt');
+              break;
+            default:
+              navigate('/dashboard');
+              break;
+          }
+        } else {
+          navigate('/dashboard');
+        }
+      }
+    };
+    
+    checkUser();
   }, [user, navigate]);
 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
@@ -81,7 +101,7 @@ const Login = () => {
         description: "Bem-vindo de volta à plataforma.",
       });
       
-      // Auth context will handle the redirect
+      // Auth context and useEffect will handle the redirect based on user type
     } catch (error) {
       console.error("Erro no login:", error);
       setAuthError("Ocorreu um erro ao tentar fazer login. Tente novamente.");
@@ -266,7 +286,7 @@ const Login = () => {
                 
                 <p className="text-center text-sm text-muted-foreground">
                   Área administrativa?{' '}
-                  <Link to="/admin-login" className="text-primary font-medium hover:underline">
+                  <Link to="/admin/login" className="text-primary font-medium hover:underline">
                     Login de administrador
                   </Link>
                 </p>

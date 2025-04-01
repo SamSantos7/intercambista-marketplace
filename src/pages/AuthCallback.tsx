@@ -51,11 +51,11 @@ const AuthCallback = () => {
             case 'admin':
               navigate('/admin');
               break;
-            case 'provider':
-              navigate('/dashboard');
+            case 'provider': // Anunciante
+              navigate('/dashboard'); // Dashboard para anunciantes
               break;
-            case 'client':
-              navigate('/dashboard-alt'); // Dashboard para clientes
+            case 'client': // Cliente
+              navigate('/dashboard-alt'); // Dashboard específico para clientes
               break;
             default:
               navigate('/dashboard');

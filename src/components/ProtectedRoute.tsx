@@ -5,9 +5,16 @@ import { useAuth } from '@/context/AuthContext';
 interface ProtectedRouteProps {
   children: JSX.Element;
   adminOnly?: boolean;
+  clientOnly?: boolean;
+  providerOnly?: boolean;
 }
 
-const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ 
+  children, 
+  adminOnly = false,
+  clientOnly = false,
+  providerOnly = false 
+}: ProtectedRouteProps) => {
   const { user, isLoading } = useAuth();
   
   // Mostrar um loading enquanto verifica a autenticação
@@ -24,29 +31,22 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
     return <Navigate to="/login" replace />;
   }
   
+  // Verificar as regras de permissão
+  const userType = user.user_metadata?.user_type || 'client';
+  
   // Verificar se a rota é apenas para administradores
-  if (adminOnly) {
-    // Verificar se o usuário tem permissão de administrador
-    // Esta verificação deve ser feita no banco de dados
-    const checkAdminPermission = async () => {
-      const { data } = await fetch('/api/check-admin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: user.id }),
-      }).then(res => res.json());
-      
-      return data?.isAdmin;
-    };
-    
-    // Por enquanto, vamos simples verificar com o usertype (que deveria vir do banco de dados)
-    // Na implementação real, isso deve ser verificado corretamente
-    const isAdmin = user.user_metadata?.user_type === 'admin';
-    
-    if (!isAdmin) {
-      return <Navigate to="/dashboard" replace />;
-    }
+  if (adminOnly && userType !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // Verificar se a rota é apenas para clientes
+  if (clientOnly && userType !== 'client') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // Verificar se a rota é apenas para anunciantes (providers)
+  if (providerOnly && userType !== 'provider') {
+    return <Navigate to="/dashboard-alt" replace />;
   }
   
   return children;

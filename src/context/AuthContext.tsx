@@ -23,6 +23,10 @@ interface AuthContextType {
     error: Error | null;
     data: any;
   }>;
+  createAdminUser: (email: string, password: string) => Promise<{
+    error: Error | null;
+    data: any;
+  }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -77,7 +81,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error('Erro ao carregar perfil do usuário:', error);
       } else if (data) {
-        // Store user profile data if needed
+        // Set user metadata for easier access to user type
+        if (user) {
+          const updatedUser = { 
+            ...user, 
+            user_metadata: { 
+              ...user.user_metadata,
+              user_type: data.user_type
+            }
+          };
+          setUser(updatedUser);
+        }
         console.log('Perfil do usuário carregado:', data);
       }
     } catch (error) {
@@ -174,6 +188,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Função para criar usuário admin
+  const createAdminUser = async (email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Register admin with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: 'Administrador',
+            user_type: 'admin'
+          }
+        }
+      });
+      
+      if (authError) {
+        return { data: null, error: authError };
+      }
+      
+      // Forçar a atualização do tipo de usuário para admin
+      if (authData.user) {
+        await supabase
+          .from('users')
+          .update({ user_type: 'admin' })
+          .eq('id', authData.user.id);
+      }
+      
+      return { data: authData, error: null };
+    } catch (error) {
+      return { data: null, error: error as Error };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value = {
     user,
     session,
@@ -183,7 +234,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut,
     signInWithGoogle,
     signInWithFacebook,
-    updateProfile
+    updateProfile,
+    createAdminUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

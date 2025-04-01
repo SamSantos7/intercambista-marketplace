@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,8 +35,9 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { RegisterUserRole } from '@/types/user';
+import { useAuth } from '@/context/AuthContext';
 
 // Validação do formulário
 const registerSchema = z.object({
@@ -66,12 +68,15 @@ const advertiserSchema = z.object({
 
 const Register = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { signUp } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<RegisterUserRole>('client');
   const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Form para dados básicos
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -136,30 +141,50 @@ const Register = () => {
     }
 
     try {
+      setIsLoading(true);
+      
       // Criar objeto com dados do usuário
       const userData = {
-        ...values,
+        fullName: values.fullName,
+        email: values.email,
+        country: values.location,
+        userType: values.role === 'advertiser' ? 'provider' : 'client', // "provider" é como o backend chama o "advertiser"
+        description: values.description,
         profileImage: profileImagePreview,
       };
       
       // Adicionar dados de anunciante se aplicável
       if (currentTab === 'advertiser') {
         const advertiserData = advertiserForm.getValues();
-        Object.assign(userData, advertiserData);
+        Object.assign(userData, {
+          skills: advertiserData.skills,
+          experience: advertiserData.experience,
+          portfolio: advertiserData.portfolio,
+        });
       }
       
       console.log("Dados do registro:", userData);
       
-      // Simulação de registro bem-sucedido
+      // Realizar o cadastro no Supabase
+      const { error } = await signUp(values.email, values.password, userData);
+      
+      if (error) {
+        toast({
+          title: "Erro no cadastro",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Registro bem-sucedido
       toast({
         title: "Registro concluído!",
         description: "Enviamos um e-mail de confirmação para ativar sua conta.",
       });
       
       // Redirecionar para login após registro
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      navigate('/login');
     } catch (error) {
       console.error("Erro no registro:", error);
       toast({
@@ -167,6 +192,8 @@ const Register = () => {
         description: "Ocorreu um erro ao tentar registrar sua conta. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -403,8 +430,13 @@ const Register = () => {
                 </CardContent>
 
                 <CardFooter className="flex flex-col space-y-4">
-                  <Button type="submit" className="w-full">
-                    {currentTab === 'client' ? 'Criar conta' : 'Continuar'}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <span className="flex items-center">
+                        <span className="animate-spin mr-2 h-4 w-4 border-2 border-b-0 border-r-0 rounded-full"></span>
+                        Processando...
+                      </span>
+                    ) : currentTab === 'client' ? 'Criar conta' : 'Continuar'}
                   </Button>
                   <p className="text-center text-sm text-muted-foreground">
                     Já possui uma conta?{' '}
@@ -498,8 +530,13 @@ const Register = () => {
                     <Button type="button" variant="outline" className="flex-1" onClick={handleBack}>
                       Voltar
                     </Button>
-                    <Button type="submit" className="flex-1">
-                      Criar conta
+                    <Button type="submit" className="flex-1" disabled={isLoading}>
+                      {isLoading ? (
+                        <span className="flex items-center">
+                          <span className="animate-spin mr-2 h-4 w-4 border-2 border-b-0 border-r-0 rounded-full"></span>
+                          Processando...
+                        </span>
+                      ) : "Criar conta"}
                     </Button>
                   </div>
                 </CardFooter>
