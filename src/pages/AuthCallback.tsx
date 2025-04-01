@@ -2,9 +2,11 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -14,6 +16,11 @@ const AuthCallback = () => {
         
         if (error) {
           console.error('Erro ao obter sessão:', error);
+          toast({
+            title: "Erro de autenticação",
+            description: "Não foi possível verificar sua sessão.",
+            variant: "destructive",
+          });
           navigate('/login?error=session_error');
           return;
         }
@@ -28,6 +35,11 @@ const AuthCallback = () => {
           
           if (userError) {
             console.error('Erro ao obter tipo de usuário:', userError);
+            toast({
+              title: "Erro de perfil",
+              description: "Não foi possível verificar seu tipo de usuário.",
+              variant: "destructive",
+            });
             navigate('/dashboard'); // Fallback para dashboard genérico
             return;
           }
@@ -51,16 +63,25 @@ const AuthCallback = () => {
           }
         } else {
           // Se não houver sessão, voltar para login
+          toast({
+            title: "Sessão expirada",
+            description: "Por favor, faça login novamente.",
+          });
           navigate('/login');
         }
       } catch (error) {
         console.error('Erro ao processar callback:', error);
+        toast({
+          title: "Erro inesperado",
+          description: "Ocorreu um erro ao processar seu login.",
+          variant: "destructive",
+        });
         navigate('/login?error=auth_error');
       }
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

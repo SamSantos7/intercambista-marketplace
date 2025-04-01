@@ -1,5 +1,6 @@
 
 import { PaymentMethod } from "@/types/payment";
+import { AlertCircle, CreditCard, Landmark, Zap, Wallet, CircleDollarSign } from "lucide-react";
 
 export const paymentMethods: Record<PaymentMethod, { name: string; fee: number; icon: string }> = {
   credit_card: {
@@ -45,4 +46,27 @@ export const getPaymentMethodData = (method: string) => {
 export const calculateFee = (amount: number, method: string): number => {
   const paymentMethod = getPaymentMethodData(method);
   return amount * paymentMethod.fee;
+};
+
+export const getPaymentMethodIcon = (method: string) => {
+  const iconName = getPaymentMethodData(method).icon;
+  
+  switch (iconName) {
+    case "credit-card":
+      return CreditCard;
+    case "zap":
+      return Zap;
+    case "landmark":
+      return Landmark;
+    case "wallet":
+      return Wallet;
+    case "paypal":
+      return CircleDollarSign;
+    default:
+      return AlertCircle;
+  }
+};
+
+export const getAvailablePaymentMethods = (): PaymentMethod[] => {
+  return Object.keys(paymentMethods) as PaymentMethod[];
 };

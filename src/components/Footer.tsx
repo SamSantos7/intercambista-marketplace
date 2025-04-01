@@ -23,16 +23,16 @@ const Footer = () => {
               Conectando intercambistas a oportunidades de renda extra, com segurança e simplicidade.
             </p>
             <div className="flex items-center gap-3 mt-2">
-              <SocialLink href="#" aria-label="Facebook">
+              <SocialLink href="https://facebook.com" aria-label="Facebook">
                 <Facebook className="h-4 w-4" />
               </SocialLink>
-              <SocialLink href="#" aria-label="Instagram">
+              <SocialLink href="https://instagram.com" aria-label="Instagram">
                 <Instagram className="h-4 w-4" />
               </SocialLink>
-              <SocialLink href="#" aria-label="Twitter">
+              <SocialLink href="https://twitter.com" aria-label="Twitter">
                 <Twitter className="h-4 w-4" />
               </SocialLink>
-              <SocialLink href="#" aria-label="LinkedIn">
+              <SocialLink href="https://linkedin.com" aria-label="LinkedIn">
                 <Linkedin className="h-4 w-4" />
               </SocialLink>
             </div>
@@ -42,11 +42,11 @@ const Footer = () => {
           <div className="flex flex-col gap-4">
             <h3 className="font-semibold">Navegação</h3>
             <nav className="flex flex-col gap-2">
-              <FooterLink href="/">Home</FooterLink>
-              <FooterLink href="/services">Serviços</FooterLink>
-              <FooterLink href="/about">Sobre Nós</FooterLink>
-              <FooterLink href="/contact">Contato</FooterLink>
-              <FooterLink href="/blog">Blog</FooterLink>
+              <FooterLink to="/">Home</FooterLink>
+              <FooterLink to="/services">Serviços</FooterLink>
+              <FooterLink to="/about">Sobre Nós</FooterLink>
+              <FooterLink to="/contact">Contato</FooterLink>
+              <FooterLink to="/blog">Blog</FooterLink>
             </nav>
           </div>
 
@@ -54,11 +54,11 @@ const Footer = () => {
           <div className="flex flex-col gap-4">
             <h3 className="font-semibold">Informações</h3>
             <nav className="flex flex-col gap-2">
-              <FooterLink href="/terms">Termos de Uso</FooterLink>
-              <FooterLink href="/privacy">Política de Privacidade</FooterLink>
-              <FooterLink href="/faq">Perguntas Frequentes</FooterLink>
-              <FooterLink href="/support">Suporte</FooterLink>
-              <FooterLink href="/cookies">Política de Cookies</FooterLink>
+              <FooterLink to="/terms">Termos de Uso</FooterLink>
+              <FooterLink to="/privacy">Política de Privacidade</FooterLink>
+              <FooterLink to="/faq">Perguntas Frequentes</FooterLink>
+              <FooterLink to="/support">Suporte</FooterLink>
+              <FooterLink to="/cookies">Política de Cookies</FooterLink>
             </nav>
           </div>
 
@@ -67,10 +67,14 @@ const Footer = () => {
             <h3 className="font-semibold">Contato</h3>
             <div className="space-y-3 text-muted-foreground">
               <ContactItem icon={<Mail className="h-4 w-4" />}>
-                contato@intercambista.com
+                <a href="mailto:contato@intercambista.com" className="hover:text-foreground transition-colors">
+                  contato@intercambista.com
+                </a>
               </ContactItem>
               <ContactItem icon={<Phone className="h-4 w-4" />}>
-                +55 (11) 9999-9999
+                <a href="tel:+551199999999" className="hover:text-foreground transition-colors">
+                  +55 (11) 9999-9999
+                </a>
               </ContactItem>
               <ContactItem icon={<MapPin className="h-4 w-4" />}>
                 São Paulo, Brasil
@@ -112,13 +116,13 @@ const SocialLink = ({ href, children, 'aria-label': ariaLabel }: SocialLinkProps
 );
 
 interface FooterLinkProps {
-  href: string;
+  to: string;
   children: React.ReactNode;
 }
 
-const FooterLink = ({ href, children }: FooterLinkProps) => (
+const FooterLink = ({ to, children }: FooterLinkProps) => (
   <Link 
-    to={href} 
+    to={to} 
     className="text-muted-foreground hover:text-foreground transition-colors duration-200 text-link"
   >
     {children}

@@ -4,11 +4,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +27,11 @@ const Navbar = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+
+  const handleLogout = async () => {
+    await signOut();
+    // No need to navigate - AuthContext will handle redirection
+  };
 
   return (
     <header 
@@ -49,12 +56,25 @@ const Navbar = () => {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-4 animate-fade-in">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/login">Entrar</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link to="/register">Cadastrar</Link>
-          </Button>
+          {user ? (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                Sair
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/login">Entrar</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/register">Cadastrar</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -80,14 +100,29 @@ const Navbar = () => {
             <NavLink to="/about" label="Sobre" mobile />
             <NavLink to="/contact" label="Contato" mobile />
             <div className="flex flex-col gap-2 pt-4 border-t">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/login" className="flex items-center gap-2">
-                  <User size={16} /> Entrar
-                </Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link to="/register">Cadastrar</Link>
-              </Button>
+              {user ? (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/dashboard" className="flex items-center gap-2">
+                      <User size={16} /> Dashboard
+                    </Link>
+                  </Button>
+                  <Button size="sm" onClick={handleLogout}>
+                    Sair
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/login" className="flex items-center gap-2">
+                      <User size={16} /> Entrar
+                    </Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link to="/register">Cadastrar</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </nav>
         </div>

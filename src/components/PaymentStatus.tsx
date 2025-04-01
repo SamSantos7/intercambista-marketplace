@@ -3,6 +3,7 @@ import React from 'react';
 import { CheckCircle2, XCircle, Clock, AlertCircle, RotateCw, MoveLeft, ArrowLeftRight, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PaymentStatus as PaymentStatusType } from '@/types/payment';
+import { Button } from '@/components/ui/button';
 
 interface PaymentStatusProps {
   status: PaymentStatusType;
@@ -11,9 +12,9 @@ interface PaymentStatusProps {
   children?: React.ReactNode;
   reason?: string;
   hasActions?: boolean;
-  onDispute?: () => void;
-  onRefund?: () => void;
-  onCancel?: () => void;
+  onDispute?: (id: string) => void;
+  onRefund?: (id: string) => void;
+  onCancel?: (id: string) => void;
   showActions?: boolean;
 }
 
@@ -127,28 +128,37 @@ const PaymentStatus = ({
       {hasActions && showActions && (
         <div className="flex flex-wrap gap-2 mt-2">
           {canDispute && onDispute && (
-            <button
-              onClick={onDispute}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
               className="text-xs text-warning hover:underline"
+              onClick={() => onDispute('payment-id')}
             >
               Abrir disputa
-            </button>
+            </Button>
           )}
           {canRefund && onRefund && (
-            <button
-              onClick={onRefund}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
               className="text-xs text-info hover:underline"
+              onClick={() => onRefund('payment-id')}
             >
               Solicitar reembolso
-            </button>
+            </Button>
           )}
           {canCancel && onCancel && (
-            <button
-              onClick={onCancel}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
               className="text-xs text-destructive hover:underline"
+              onClick={() => onCancel('payment-id')}
             >
               Cancelar
-            </button>
+            </Button>
           )}
         </div>
       )}

@@ -10,8 +10,6 @@ import { ServicePayment, PaymentStatus } from '@/types/payment';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -72,6 +70,25 @@ const PaymentDetail = () => {
     });
   };
 
+  const handlePrintReceipt = () => {
+    // In a real app, this would open a print dialog or generate PDF
+    toast({
+      title: "Impressão",
+      description: "Preparando recibo para impressão...",
+    });
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
+  
+  const handleDownloadPdf = () => {
+    // In a real app, this would download a PDF
+    toast({
+      title: "Download iniciado",
+      description: "O seu PDF está sendo gerado e baixado.",
+    });
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -113,11 +130,11 @@ const PaymentDetail = () => {
           </div>
           
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handlePrintReceipt}>
               <Printer className="h-4 w-4 mr-2" />
               Imprimir Recibo
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleDownloadPdf}>
               <Download className="h-4 w-4 mr-2" />
               Baixar PDF
             </Button>
@@ -148,11 +165,19 @@ const PaymentDetail = () => {
                   <CardTitle>Ações</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={handlePrintReceipt}
+                  >
                     <Printer className="mr-2 h-4 w-4" />
                     Imprimir Comprovante
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={handleDownloadPdf}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Baixar Recibo
                   </Button>
