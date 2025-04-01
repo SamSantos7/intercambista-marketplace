@@ -1,132 +1,154 @@
 
-import { useState, useCallback, useMemo } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { Notification } from '@/types/notification';
-
-// Mock de notificações até implementarmos completamente com Supabase
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    title: 'Nova mensagem',
-    content: 'Você recebeu uma nova mensagem de João Silva',
-    type: 'message',
-    read: false,
-    createdAt: new Date().toISOString(),
-    userId: 'user1'
-  },
-  {
-    id: '2',
-    title: 'Pagamento recebido',
-    content: 'Seu pagamento de R$ 150,00 foi confirmado',
-    type: 'payment',
-    read: true,
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    userId: 'user1'
-  },
-  {
-    id: '3',
-    title: 'Novo serviço',
-    content: 'Seu serviço "Aulas de inglês" foi aprovado',
-    type: 'service',
-    read: false,
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    userId: 'user1'
-  }
-];
+import { useState, useEffect } from "react";
+import { Notification } from "@/types/notification";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "./use-toast";
 
 export const useNotifications = () => {
-  const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const { toast } = useToast();
 
-  // Calcular contagem de não lidas
-  const unreadCount = useMemo(() => {
-    return notifications.filter(notification => !notification.read).length;
-  }, [notifications]);
-
-  // Buscar notificações
-  const fetchNotifications = useCallback(async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    setError(null);
-    
+  // Função para buscar notificações
+  const fetchNotifications = async () => {
     try {
-      // TODO: Implementar integração real com Supabase
-      // Por enquanto estamos usando dados mockados
+      setLoading(true);
+      const { data: session } = await supabase.auth.getSession();
       
-      // Simulando um delay de rede
-      await new Promise(resolve => setTimeout(resolve, 300));
+      if (!session?.session?.user) {
+        setLoading(false);
+        return;
+      }
       
-      // No futuro, seria algo assim:
-      // const { data, error } = await supabase
-      //   .from('notifications')
-      //   .select('*')
-      //   .eq('user_id', user.id)
-      //   .order('created_at', { ascending: false });
+      const userId = session.session.user.id;
       
-      setNotifications(mockNotifications);
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("userId", userId)
+        .order("createdAt", { ascending: false });
+      
+      if (error) {
+        console.error("Erro ao buscar notificações:", error);
+        setError("Não foi possível carregar as notificações");
+      } else {
+        // Converter strings de data para objetos Date
+        const formattedNotifications = (data || []).map((notif) => ({
+          ...notif,
+          createdAt: new Date(notif.createdAt).toISOString()
+        })) as Notification[];
+        
+        setNotifications(formattedNotifications);
+        setUnreadCount(formattedNotifications.filter(n => !n.read).length);
+      }
     } catch (err) {
-      console.error('Erro ao buscar notificações:', err);
-      setError('Não foi possível carregar as notificações');
+      console.error("Erro ao processar notificações:", err);
+      setError("Ocorreu um erro ao processar as notificações");
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  };
 
-  // Marcar uma notificação como lida
-  const markAsRead = useCallback(async (id: string) => {
-    if (!user) return;
-    
+  // Marcar notificação como lida
+  const markAsRead = async (id: string) => {
     try {
-      // TODO: Implementar integração real com Supabase
-      // Por enquanto estamos atualizando apenas o estado local
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("id", id);
       
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification.id === id 
-            ? { ...notification, read: true } 
-            : notification
-        )
-      );
-      
-      // No futuro, seria algo assim:
-      // await supabase
-      //   .from('notifications')
-      //   .update({ read: true })
-      //   .eq('id', id)
-      //   .eq('user_id', user.id);
-      
+      if (error) {
+        console.error("Erro ao marcar notificação como lida:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível marcar a notificação como lida",
+          variant: "destructive",
+        });
+      } else {
+        // Atualizar estado local
+        setNotifications(prev => prev.map(n => 
+          n.id === id ? { ...n, read: true } : n
+        ));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (err) {
-      console.error('Erro ao marcar notificação como lida:', err);
+      console.error("Erro ao processar marcação:", err);
     }
-  }, [user]);
+  };
 
   // Marcar todas as notificações como lidas
-  const markAllAsRead = useCallback(async () => {
-    if (!user) return;
-    
+  const markAllAsRead = async () => {
     try {
-      // TODO: Implementar integração real com Supabase
-      // Por enquanto estamos atualizando apenas o estado local
+      const { data: session } = await supabase.auth.getSession();
       
-      setNotifications(prev => 
-        prev.map(notification => ({ ...notification, read: true }))
-      );
+      if (!session?.session?.user) return;
       
-      // No futuro, seria algo assim:
-      // await supabase
-      //   .from('notifications')
-      //   .update({ read: true })
-      //   .eq('user_id', user.id)
-      //   .eq('read', false);
+      const userId = session.session.user.id;
       
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("userId", userId)
+        .eq("read", false);
+      
+      if (error) {
+        console.error("Erro ao marcar todas notificações como lidas:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível marcar todas as notificações como lidas",
+          variant: "destructive",
+        });
+      } else {
+        // Atualizar estado local
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        setUnreadCount(0);
+      }
     } catch (err) {
-      console.error('Erro ao marcar todas notificações como lidas:', err);
+      console.error("Erro ao processar marcação em massa:", err);
     }
-  }, [user]);
+  };
+
+  // Excluir uma notificação
+  const deleteNotification = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", id);
+      
+      if (error) {
+        console.error("Erro ao excluir notificação:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir a notificação",
+          variant: "destructive",
+        });
+      } else {
+        // Atualizar estado local
+        const deletedNotification = notifications.find(n => n.id === id);
+        setNotifications(prev => prev.filter(n => n.id !== id));
+        
+        // Atualizar contagem de não lidas se necessário
+        if (deletedNotification && !deletedNotification.read) {
+          setUnreadCount(prev => Math.max(0, prev - 1));
+        }
+        
+        toast({
+          title: "Sucesso",
+          description: "Notificação excluída com sucesso",
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao excluir notificação:", err);
+    }
+  };
+
+  // Buscar notificações ao montar o componente
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   return {
     notifications,
@@ -135,6 +157,7 @@ export const useNotifications = () => {
     error,
     fetchNotifications,
     markAsRead,
-    markAllAsRead
+    markAllAsRead,
+    deleteNotification
   };
 };

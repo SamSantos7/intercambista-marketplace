@@ -1,92 +1,61 @@
 
-import { Currency, CurrencyCode } from "@/types/payment";
+import { Currency, CurrencyCode } from '@/types/payment';
 
-export const currencies: Record<CurrencyCode, Currency> = {
-  BRL: {
-    code: 'BRL',
-    symbol: 'R$',
-    name: 'Real Brasileiro'
-  },
-  EUR: {
-    code: 'EUR',
-    symbol: '€',
-    name: 'Euro'
-  },
-  USD: {
-    code: 'USD',
-    symbol: '$',
-    name: 'Dólar Americano'
-  },
-  CAD: {
-    code: 'CAD',
-    symbol: 'C$',
-    name: 'Dólar Canadense'
-  },
-  AUD: {
-    code: 'AUD',
-    symbol: 'A$',
-    name: 'Dólar Australiano'
-  },
-  AED: {
-    code: 'AED',
-    symbol: 'AED',
-    name: 'Dirham dos Emirados'
-  },
-  GBP: {
-    code: 'GBP',
-    symbol: '£',
-    name: 'Libra Esterlina'
+export const formatCurrency = (
+  value: number,
+  currency: string = "BRL",
+  locale: string = "pt-BR"
+): string => {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency,
+  }).format(value);
+};
+
+export const formatBRL = (value: number): string => {
+  return formatCurrency(value, "BRL");
+};
+
+export const formatUSD = (value: number): string => {
+  return formatCurrency(value, "USD", "en-US");
+};
+
+export const formatEUR = (value: number): string => {
+  return formatCurrency(value, "EUR", "de-DE");
+};
+
+export const getCurrencySymbol = (currency: string): string => {
+  switch (currency.toUpperCase()) {
+    case "BRL":
+      return "R$";
+    case "USD":
+      return "$";
+    case "EUR":
+      return "€";
+    case "GBP":
+      return "£";
+    case "CAD":
+      return "C$";
+    case "AUD":
+      return "A$";
+    default:
+      return currency;
   }
 };
 
-export const countryToCurrency: Record<string, CurrencyCode> = {
-  'Brasil': 'BRL',
-  'Irlanda': 'EUR',
-  'Espanha': 'EUR',
-  'Malta': 'EUR',
-  'Austrália': 'AUD',
-  'Canadá': 'CAD',
-  'Dubai': 'AED',
-  'Reino Unido': 'GBP',
-  'Estados Unidos': 'USD'
-};
-
-export const getDefaultCurrency = (): Currency => {
-  return currencies.BRL;
-};
-
-export const getUserCurrency = (location?: string): Currency => {
-  if (!location) return getDefaultCurrency();
+export const convertCurrency = (
+  value: number,
+  fromCurrency: string,
+  toCurrency: string,
+  rates: Record<string, number> = { BRL: 1, USD: 0.2, EUR: 0.18 }
+): number => {
+  // Converter para BRL primeiro (usado como moeda base)
+  const valueInBRL = fromCurrency.toUpperCase() === "BRL" 
+    ? value 
+    : value / rates[fromCurrency.toUpperCase()] || 1;
   
-  for (const [country, code] of Object.entries(countryToCurrency)) {
-    if (location.includes(country)) {
-      return currencies[code];
-    }
-  }
-  
-  return getDefaultCurrency();
-};
-
-export const formatCurrency = (amount: number, currency: CurrencyCode): string => {
-  return `${currencies[currency].symbol} ${amount.toFixed(2)}`;
-};
-
-export const convertCurrency = async (amount: number, from: CurrencyCode, to: CurrencyCode): Promise<number> => {
-  // In a real application, this would call an exchange rate API
-  // For now, we'll use static conversion rates for demonstration
-  const rates: Record<CurrencyCode, number> = {
-    BRL: 1,
-    EUR: 0.18,
-    USD: 0.2,
-    CAD: 0.27,
-    AUD: 0.3,
-    AED: 0.73,
-    GBP: 0.16
-  };
-  
-  // Convert to BRL first (our base currency) if not already
-  const amountInBRL = from === 'BRL' ? amount : amount / rates[from];
-  
-  // Then convert to target currency
-  return to === 'BRL' ? amountInBRL : amountInBRL * rates[to];
+  // Então converter de BRL para a moeda alvo
+  return toCurrency.toUpperCase() === "BRL" 
+    ? valueInBRL 
+    : valueInBRL * (rates[toCurrency.toUpperCase()] || 1);
 };

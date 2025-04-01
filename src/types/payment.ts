@@ -3,6 +3,10 @@ export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 
 
 export type PaymentMethod = 'credit_card' | 'debit_card' | 'pix' | 'bank_transfer' | 'wallet' | 'paypal';
 
+export type Currency = 'BRL' | 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD';
+export type CurrencyCode = Currency;
+export type PaymentMethodType = PaymentMethod;
+
 export interface ServicePayment {
   id: string;
   serviceId: string;

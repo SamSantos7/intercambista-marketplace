@@ -284,13 +284,12 @@ const Register = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="BR">Brasil</SelectItem>
-                            <SelectItem value="PT">Portugal</SelectItem>
-                            <SelectItem value="US">Estados Unidos</SelectItem>
-                            <SelectItem value="CA">Canadá</SelectItem>
-                            <SelectItem value="UK">Reino Unido</SelectItem>
+                            <SelectItem value="IE">Irlanda</SelectItem>
+                            <SelectItem value="AE">Dubai</SelectItem>
                             <SelectItem value="AU">Austrália</SelectItem>
-                            <SelectItem value="OTHER">Outro</SelectItem>
+                            <SelectItem value="MT">Malta</SelectItem>
+                            <SelectItem value="CA">Canadá</SelectItem>
+                            <SelectItem value="ES">Espanha</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

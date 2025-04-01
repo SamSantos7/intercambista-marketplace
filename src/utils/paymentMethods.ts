@@ -1,46 +1,48 @@
 
-import { PaymentMethodType, CurrencyCode } from "@/types/payment";
-import { CreditCard, Receipt, QrCode, Banknote } from "lucide-react";
+import { PaymentMethod } from "@/types/payment";
 
-export const paymentMethods: PaymentMethodType[] = [
-  {
-    id: 'credit-card',
-    name: 'Cartão de Crédito',
-    icon: 'CreditCard',
-    availableFor: ['BRL', 'EUR', 'USD', 'CAD', 'AUD', 'AED', 'GBP']
+export const paymentMethods: Record<PaymentMethod, { name: string; fee: number; icon: string }> = {
+  credit_card: {
+    name: "Cartão de Crédito",
+    fee: 0.05,
+    icon: "credit-card"
   },
-  {
-    id: 'boleto',
-    name: 'Boleto Bancário',
-    icon: 'Receipt',
-    availableFor: ['BRL']
+  debit_card: {
+    name: "Cartão de Débito",
+    fee: 0.02,
+    icon: "credit-card"
   },
-  {
-    id: 'pix',
-    name: 'Pix',
-    icon: 'QrCode',
-    availableFor: ['BRL']
+  pix: {
+    name: "PIX",
+    fee: 0.01,
+    icon: "zap"
   },
-  {
-    id: 'wire-transfer',
-    name: 'Transferência Bancária',
-    icon: 'Banknote',
-    availableFor: ['BRL', 'EUR', 'USD', 'CAD', 'AUD', 'AED', 'GBP']
-  }
-];
-
-export const getPaymentMethodIcon = (methodId: string) => {
-  switch (methodId) {
-    case 'credit-card': return CreditCard;
-    case 'boleto': return Receipt;
-    case 'pix': return QrCode;
-    case 'wire-transfer': return Banknote;
-    default: return CreditCard;
+  bank_transfer: {
+    name: "Transferência Bancária",
+    fee: 0,
+    icon: "landmark"
+  },
+  wallet: {
+    name: "Carteira Digital",
+    fee: 0.025,
+    icon: "wallet"
+  },
+  paypal: {
+    name: "PayPal",
+    fee: 0.045,
+    icon: "paypal"
   }
 };
 
-export const getAvailablePaymentMethods = (currencyCode: CurrencyCode): PaymentMethodType[] => {
-  return paymentMethods.filter(method => 
-    method.availableFor.includes(currencyCode)
-  );
+export const getPaymentMethodData = (method: string) => {
+  return paymentMethods[method as PaymentMethod] || {
+    name: "Outro",
+    fee: 0,
+    icon: "help-circle"
+  };
+};
+
+export const calculateFee = (amount: number, method: string): number => {
+  const paymentMethod = getPaymentMethodData(method);
+  return amount * paymentMethod.fee;
 };

@@ -19,7 +19,7 @@ const AuthCallback = () => {
         }
         
         if (session) {
-          // Obter dados do usuário para verificar o tipo (admin ou regular)
+          // Obter dados do usuário para verificar o tipo (admin, client ou provider)
           const { data: userData, error: userError } = await supabase
             .from('users')
             .select('user_type')
@@ -28,13 +28,26 @@ const AuthCallback = () => {
           
           if (userError) {
             console.error('Erro ao obter tipo de usuário:', userError);
+            navigate('/dashboard'); // Fallback para dashboard genérico
+            return;
           }
           
           // Redirecionar com base no tipo de usuário
-          if (userData?.user_type === 'admin') {
-            navigate('/admin');
-          } else {
-            navigate('/dashboard');
+          console.info('Tipo de usuário:', userData?.user_type);
+          
+          switch (userData?.user_type) {
+            case 'admin':
+              navigate('/admin');
+              break;
+            case 'provider':
+              navigate('/dashboard');
+              break;
+            case 'client':
+              navigate('/dashboard-alt'); // Dashboard para clientes
+              break;
+            default:
+              navigate('/dashboard');
+              break;
           }
         } else {
           // Se não houver sessão, voltar para login
